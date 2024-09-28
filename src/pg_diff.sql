@@ -3,7 +3,7 @@ create type "pg_diff_record" as (
   "type" text,
   "name" text,
   "namespace" text,
-  "data" jsonb
+  "extras" jsonb
 );
 
 create view "pg_diff_inspect" as (
@@ -28,20 +28,50 @@ create view "pg_diff_inspect" as (
         'isPartition', relIsPartition,
         'acl', relAcl,
         'options', relOptions
-      ) as "data"
+      ) as "extras"
     from pg_class
+  union
+  select
+      null as "kind",
+      'pg_attribute' as "type",
+      attName as "name",
+      relNamespace::regNamespace::text as "namespace",
+      jsonb_build_object(
+        'relation', attRelId::regClass,
+        'type', attTypId::regType,
+        'length', attLen,
+        'dimensions', attNDims,
+        'compression', attCompression,
+        'notNull', attNotNull,
+        'hasDefault', attHasDef,
+        'hasMissing', attHasMissing,
+        'identity', attIdentity,
+        'generated', attGenerated,
+        'isLocal', attIsLocal,
+        'ancestors', attInhCount,
+        'collation', attCollation::regCollation,
+        'statistics', attStatTarget,
+        'acl', attAcl,
+        'options', attOptions,
+        'fdwOptions', attFdwOptions,
+        'missingValue', attMissingVal
+      ) as "extras"
+    from pg_attribute
+      inner join pg_class on attRelId = pg_class.oid
+    where not attIsDropped
+      and attNum > 0
 );
 
 create function "pg_diff" (jsonb)
 returns setof "pg_diff_record"
 language sql as $$
-  select '-' as "kind", "type", "name", "namespace", "data" from (
+  select '-' as "kind", "type", "name", "namespace", "extras" from (
     select * from jsonb_populate_recordSet(null::"pg_diff_record", $1)
     except
     select * from "pg_diff_inspect"
   )
   union
-  select '+' as "kind", "type", "name", "namespace", "data" from (
+  select '+' as "kind", "type", "name", "namespace", "extras" from (
     select * from "pg_diff_inspect"
     except
     select * from jsonb_populate_recordSet(null::"pg_diff_record", $1)
