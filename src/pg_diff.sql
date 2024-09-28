@@ -66,15 +66,24 @@ create view "pg_diff_inspect" as (
 create function "pg_diff" (jsonb)
 returns setof "pg_diff_record"
 language sql as $$
-  select '-' as "kind", "type", "name", "namespace", "extras" from (
-    select * from jsonb_populate_recordSet(null::"pg_diff_record", $1)
-    except
-    select * from "pg_diff_inspect"
-  )
-  union
-  select '+' as "kind", "type", "name", "namespace", "extras" from (
-    select * from "pg_diff_inspect"
-    except
-    select * from jsonb_populate_recordSet(null::"pg_diff_record", $1)
-  )
+  select
+      string_agg("kind", '') as "kind",
+      "type",
+      "name",
+      "namespace",
+      jsonb_object_agg("kind", "extras") as "extras"
+    from (
+      select '-' as "kind", "type", "name", "namespace", "extras" from (
+        select * from jsonb_populate_recordSet(null::"pg_diff_record", $1)
+        except
+        select * from "pg_diff_inspect"
+      )
+      union
+      select '+' as "kind", "type", "name", "namespace", "extras" from (
+        select * from "pg_diff_inspect"
+        except
+        select * from jsonb_populate_recordSet(null::"pg_diff_record", $1)
+      )
+    )
+    group by "type", "name", "namespace"
 $$;
