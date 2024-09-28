@@ -1,0 +1,22 @@
+{
+  "type": "module",
+  "devDependencies": {
+    "@electric-sql/pglite": "0.2.9",
+    "@jest/globals": "29.7.0",
+    "jest": "29.7.0"
+  },
+  "wallaby": {
+    "runMode": "onsave",
+    "env": {
+      "params": {
+        "runner": "--experimental-vm-modules"
+      }
+    },
+    "hints": {
+      "allowIgnoringCoverageInTests": true
+    }
+  },
+  "prettier": {
+    "printWidth": 100
+  }
+}
