@@ -16,9 +16,8 @@ create view "pg_diff_inspect" as (
         'type', relType::regType,
         'ofType', relOfType::regType,
         'owner', relOwner::regRole,
-        'accessMethod', relAM, -- TODO get name
-        'fileNode', relFileNode, -- TODO get name
-        'tableSpace', relTableSpace, -- TODO get name
+        'accessMethod', amName,
+        'tableSpace', spcName,
         'isShared', relIsShared,
         'persistence', relPersistence,
         'kind', relKind,
@@ -30,6 +29,8 @@ create view "pg_diff_inspect" as (
         'options', relOptions
       ) as "extras"
     from pg_class
+      left join pg_am on relAM = pg_am.oid
+      left join pg_tablespace on relTableSpace = pg_tablespace.oid
   union
   select
       null as "kind",
