@@ -9,11 +9,13 @@ describe("pg-diff", () => {
   afterAll(async () => pg.close());
 
   test("create table", async () => {
-    const original = await sql`select * from "pg_diff_inspect"`;
+    const original = await sql`select * from "pg_diff_inspect" where "namespace" = 'public'`;
 
     await sql`create table "test" ()`;
 
-    const diff = await sql`select * from "pg_diff"(${original}) where "namespace" = 'public'`;
+    const updated = await sql`select * from "pg_diff_inspect" where "namespace" = 'public'`;
+
+    const diff = await sql`select * from "pg_diff"(${original}, ${updated})`;
     expect(diff).toEqual([
       {
         kind: "+",
@@ -37,17 +39,20 @@ describe("pg-diff", () => {
             replicaIdentity: "d",
             forceRowSecurity: false,
           },
+          delta: {},
         },
       },
     ]);
   });
 
   test("drop table", async () => {
-    const original = await sql`select * from "pg_diff_inspect"`;
+    const original = await sql`select * from "pg_diff_inspect" where "namespace" = 'public'`;
 
     await sql`drop table "test"`;
 
-    const diff = await sql`select * from "pg_diff"(${original}) where "namespace" = 'public'`;
+    const updated = await sql`select * from "pg_diff_inspect" where "namespace" = 'public'`;
+
+    const diff = await sql`select * from "pg_diff"(${original}, ${updated})`;
     expect(diff).toEqual([
       {
         kind: "-",
@@ -71,6 +76,7 @@ describe("pg-diff", () => {
             replicaIdentity: "d",
             forceRowSecurity: false,
           },
+          delta: {},
         },
       },
     ]);
@@ -79,11 +85,13 @@ describe("pg-diff", () => {
   test("add column", async () => {
     await sql`create table "test" ()`;
 
-    const original = await sql`select * from "pg_diff_inspect"`;
+    const original = await sql`select * from "pg_diff_inspect" where "namespace" = 'public'`;
 
     await sql`alter table "test" add column "column" text`;
 
-    const diff = await sql`select * from "pg_diff"(${original}) where "namespace" = 'public'`;
+    const updated = await sql`select * from "pg_diff_inspect" where "namespace" = 'public'`;
+
+    const diff = await sql`select * from "pg_diff"(${original}, ${updated})`;
     expect(diff).toEqual([
       {
         kind: "+",
@@ -111,17 +119,20 @@ describe("pg-diff", () => {
             compression: "",
             missingValue: null,
           },
+          delta: {},
         },
       },
     ]);
   });
 
   test("change column type", async () => {
-    const original = await sql`select * from "pg_diff_inspect"`;
+    const original = await sql`select * from "pg_diff_inspect" where "namespace" = 'public'`;
 
     await sql`alter table "test" alter column "column" type varchar`;
 
-    const diff = await sql`select * from "pg_diff"(${original}) where "namespace" = 'public'`;
+    const updated = await sql`select * from "pg_diff_inspect" where "namespace" = 'public'`;
+
+    const diff = await sql`select * from "pg_diff"(${original}, ${updated})`;
     expect(diff).toEqual([
       {
         kind: "+-",
@@ -169,8 +180,11 @@ describe("pg-diff", () => {
             compression: "",
             missingValue: null,
           },
+          delta: {},
         },
       },
     ]);
   });
+
+  test("", async () => {});
 });
