@@ -118,6 +118,7 @@ describe("pg-diff", () => {
             statistics: -1,
             compression: "",
             missingValue: null,
+            default: null,
           },
           delta: null,
         },
@@ -135,7 +136,7 @@ describe("pg-diff", () => {
     const diff = await sql`select * from "pg_diff"(${original}, ${updated})`;
     expect(diff).toEqual([
       {
-        kind: "-+",
+        kind: "+-",
         type: "pg_attribute",
         name: "test.column",
         namespace: "public",
@@ -159,6 +160,7 @@ describe("pg-diff", () => {
             statistics: -1,
             compression: "",
             missingValue: null,
+            default: null,
           },
           "-": {
             acl: null,
@@ -179,6 +181,7 @@ describe("pg-diff", () => {
             statistics: -1,
             compression: "",
             missingValue: null,
+            default: null,
           },
           delta: {
             type: ["text", "character varying"],

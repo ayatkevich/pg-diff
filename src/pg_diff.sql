@@ -55,10 +55,14 @@ create view "pg_diff_inspect" as (
         'acl', attAcl,
         'options', attOptions,
         'fdwOptions', attFdwOptions,
-        'missingValue', attMissingVal
+        'missingValue', attMissingVal,
+        'default', pg_get_expr(pg_attrDef.adBin, pg_attrDef.adRelId, true)
       ) as "extras"
     from pg_attribute
       inner join pg_class on attRelId = pg_class.oid
+      left join pg_attrDef
+        on pg_attrDef.adRelId = pg_attribute.attRelId
+          and pg_attrDef.adNum = pg_attribute.attNum
     where not attIsDropped
       and attNum > 0
 );
