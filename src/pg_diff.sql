@@ -35,7 +35,7 @@ create view "pg_diff_inspect" as (
   select
       null as "kind",
       'pg_attribute' as "type",
-      attName as "name",
+      attRelId::regClass::text || '.' || attName as "name",
       relNamespace::regNamespace::text as "namespace",
       jsonb_build_object(
         'relation', attRelId::regClass,

@@ -96,7 +96,7 @@ describe("pg-diff", () => {
       {
         kind: "+",
         type: "pg_attribute",
-        name: "column",
+        name: "test.column",
         namespace: "public",
         extras: {
           "+": {
@@ -135,9 +135,9 @@ describe("pg-diff", () => {
     const diff = await sql`select * from "pg_diff"(${original}, ${updated})`;
     expect(diff).toEqual([
       {
-        kind: "+-",
+        kind: "-+",
         type: "pg_attribute",
-        name: "column",
+        name: "test.column",
         namespace: "public",
         extras: {
           "+": {
