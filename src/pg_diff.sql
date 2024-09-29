@@ -137,7 +137,10 @@ create function "pg_diff" (jsonb, jsonb)
 returns setof "pg_diff_record"
 language sql as $$
   select
-      string_agg("kind", '') as "kind",
+      case
+        when string_agg("kind", '') in ('+-', '-+') then '+-'
+        else string_agg("kind", '')
+      end as "kind",
       "type",
       "name",
       "namespace",
