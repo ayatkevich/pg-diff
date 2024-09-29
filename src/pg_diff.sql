@@ -63,6 +63,39 @@ create view "pg_diff_inspect" as (
       and attNum > 0
 );
 
+create function "jsonb_delta_fn" (jsonb, jsonb)
+returns jsonb
+language sql as $$
+  select case
+    when $1 is null then $2
+    else (
+      select jsonb_object_agg("key", "value")
+        from (
+          select "key", jsonb_agg("value") as "value"
+            from (
+              (
+                select * from jsonb_each($1)
+                except
+                select * from jsonb_each($2)
+              )
+              union
+              (
+                select * from jsonb_each($2)
+                except
+                select * from jsonb_each($1)
+              )
+            )
+            group by "key"
+        )
+    )
+  end
+$$;
+
+create aggregate jsonb_delta (jsonb) (
+  sFunc = "jsonb_delta_fn"(jsonb, jsonb),
+  sType = jsonb
+);
+
 create function "pg_diff" (jsonb, jsonb)
 returns setof "pg_diff_record"
 language sql as $$
@@ -72,7 +105,10 @@ language sql as $$
       "name",
       "namespace",
       jsonb_object_agg("kind", "extras") || jsonb_build_object(
-        'delta', '{}'::jsonb
+        'delta', case
+          when jsonb_delta("extras") = any_value("extras") then null
+          else jsonb_delta("extras")
+        end
       )::jsonb as "extras"
     from (
       select '-' as "kind", "type", "name", "namespace", "extras" from (

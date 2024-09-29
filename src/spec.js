@@ -39,7 +39,7 @@ describe("pg-diff", () => {
             replicaIdentity: "d",
             forceRowSecurity: false,
           },
-          delta: {},
+          delta: null,
         },
       },
     ]);
@@ -76,7 +76,7 @@ describe("pg-diff", () => {
             replicaIdentity: "d",
             forceRowSecurity: false,
           },
-          delta: {},
+          delta: null,
         },
       },
     ]);
@@ -119,7 +119,7 @@ describe("pg-diff", () => {
             compression: "",
             missingValue: null,
           },
-          delta: {},
+          delta: null,
         },
       },
     ]);
@@ -180,11 +180,11 @@ describe("pg-diff", () => {
             compression: "",
             missingValue: null,
           },
-          delta: {},
+          delta: {
+            type: ["text", "character varying"],
+          },
         },
       },
     ]);
   });
-
-  test("", async () => {});
 });
