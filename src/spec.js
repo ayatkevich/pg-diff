@@ -190,4 +190,50 @@ describe("pg-diff", () => {
       },
     ]);
   });
+
+  test("create function", async () => {
+    const original = await sql`select * from "pg_diff_inspect" where "namespace" = 'public'`;
+
+    await sql`create function "test" () returns void language plpgsql as $$begin end$$`;
+
+    const updated = await sql`select * from "pg_diff_inspect" where "namespace" = 'public'`;
+
+    const diff = await sql`select * from "pg_diff"(${original}, ${updated})`;
+    expect(diff).toEqual([
+      {
+        kind: "+",
+        type: "pg_proc",
+        name: "test",
+        namespace: "public",
+        extras: {
+          "+": {
+            acl: null,
+            bin: null,
+            cost: 100,
+            kind: "f",
+            owner: "postgres",
+            config: null,
+            source: "begin end",
+            sqlBody: null,
+            isStrict: false,
+            language: "plpgsql",
+            variadic: "-",
+            returnType: "void",
+            returnsSet: false,
+            volatility: "v",
+            isLeakProof: false,
+            parallelism: "u",
+            numberOfArgs: 0,
+            argumentModes: null,
+            argumentNames: null,
+            argumentTypes: null,
+            argumentDefaults: null,
+            isSecurityDefiner: false,
+            numberOfArgsWithDefaults: 0,
+          },
+          delta: null,
+        },
+      },
+    ]);
+  });
 });

@@ -65,6 +65,39 @@ create view "pg_diff_inspect" as (
           and pg_attrDef.adNum = pg_attribute.attNum
     where not attIsDropped
       and attNum > 0
+  union
+  select
+      null as "kind",
+      'pg_proc' as "type",
+      proName as "name",
+      proNamespace::regNamespace::text as "namespace",
+      jsonb_build_object(
+        'owner', proOwner::regRole,
+        'language', lanName,
+        'cost', proCost,
+        'variadic', proVariadic::regType,
+        'kind', proKind,
+        'isSecurityDefiner', proSecDef,
+        'isLeakProof', proLeakProof,
+        'isStrict', proIsStrict,
+        'returnsSet', proRetSet,
+        'volatility', proVolatile,
+        'parallelism', proParallel,
+        'numberOfArgs', proNArgs,
+        'numberOfArgsWithDefaults', proNArgDefaults,
+        'returnType', proRetType::regType,
+        'argumentTypes', proAllArgTypes::regType[],
+        'argumentModes', proArgModes,
+        'argumentNames', proArgNames,
+        'argumentDefaults', proArgDefaults,
+        'source', proSrc,
+        'bin', proBin,
+        'sqlBody', proSqlBody,
+        'config', proConfig,
+        'acl', proAcl
+      ) as "extras"
+    from pg_proc
+      inner join pg_language on proLang = pg_language.oid
 );
 
 create function "jsonb_delta_fn" (jsonb, jsonb)
