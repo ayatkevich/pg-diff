@@ -166,5 +166,5 @@ $$;
 create function "pg_diff" (jsonb)
 returns setof "pg_diff_record"
 language sql as $$
-  select "pg_diff"($1, to_jsonb((select jsonb_agg(to_jsonb("pg_diff_inspect")) from "pg_diff_inspect")))
+  select "pg_diff"($1, (select jsonb_agg(to_jsonb("pg_diff_inspect")) from "pg_diff_inspect"))
 $$;
