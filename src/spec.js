@@ -1,11 +1,11 @@
 import { PGlite } from "@electric-sql/pglite";
 import { afterAll, beforeAll, describe, expect, test } from "@jest/globals";
-import { readFile } from "fs/promises";
+import { definition } from "./index.js";
 
 describe("pg-diff", () => {
   const pg = new PGlite();
   const sql = async (...args) => (await pg.sql(...args)).rows;
-  beforeAll(async () => pg.exec(await readFile("./src/pg_diff.sql", "utf-8")));
+  beforeAll(async () => pg.exec(definition));
   afterAll(async () => pg.close());
 
   test("create table", async () => {
