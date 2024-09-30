@@ -1,7 +1,7 @@
 {
   "type": "module",
   "private": false,
-  "name": "pg-diff",
+  "name": "@ayatkevich/pg-diff",
   "version": "0.1.0",
   "author": "Alex Yatkevich",
   "license": "MIT",
