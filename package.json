@@ -1,5 +1,15 @@
 {
   "type": "module",
+  "private": false,
+  "name": "pg-diff",
+  "version": "0.1.0",
+  "author": "Alex Yatkevich",
+  "license": "MIT",
+  "main": "src/index.js",
+  "types": "src/index.d.ts",
+  "files": [
+    "src/"
+  ],
   "devDependencies": {
     "@electric-sql/pglite": "0.2.9",
     "@jest/globals": "29.7.0",
