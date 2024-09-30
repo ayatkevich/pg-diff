@@ -98,6 +98,23 @@ create view "pg_diff_inspect" as (
       ) as "extras"
     from pg_proc
       inner join pg_language on proLang = pg_language.oid
+  union
+  select
+      null as "kind",
+      'pg_authid' as "type",
+      rolName as "name",
+      '' as "namespace",
+      jsonb_build_object(
+        'isSuperuser', rolSuper,
+        'inherits', rolInherit,
+        'canLogin', rolCanLogin,
+        'replication', rolReplication,
+        'bypassRLS', rolBypassRLS,
+        'connectionLimit', rolConnLimit,
+        'validUntil', rolValidUntil,
+        'password', rolPassword
+      ) as "extras"
+    from pg_authid
 );
 
 create function "jsonb_delta_fn" (jsonb, jsonb)

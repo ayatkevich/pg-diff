@@ -236,4 +236,35 @@ describe("pg-diff", () => {
       },
     ]);
   });
+
+  test("create role", async () => {
+    const original = await sql`select * from "pg_diff_inspect" where "namespace" = ''`;
+
+    await sql`create role "test"`;
+
+    const updated = await sql`select * from "pg_diff_inspect" where "namespace" = ''`;
+
+    const diff = await sql`select * from "pg_diff"(${original}, ${updated})`;
+    expect(diff).toEqual([
+      {
+        kind: "+",
+        type: "pg_authid",
+        name: "test",
+        namespace: "",
+        extras: {
+          "+": {
+            canLogin: false,
+            inherits: true,
+            password: null,
+            bypassRLS: false,
+            validUntil: null,
+            isSuperuser: false,
+            replication: false,
+            connectionLimit: -1,
+          },
+          delta: null,
+        },
+      },
+    ]);
+  });
 });
