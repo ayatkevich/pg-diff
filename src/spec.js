@@ -267,4 +267,26 @@ describe("pg-diff", () => {
       },
     ]);
   });
+
+  test("create cast", async () => {
+    await sql`create function "int4" (text) returns integer language sql as $$select $1::integer$$`;
+    const original = await sql`select * from "pg_diff_inspect" where "namespace" = ''`;
+
+    await sql`create cast (text as integer) with function int4(text)`;
+
+    const updated = await sql`select * from "pg_diff_inspect" where "namespace" = ''`;
+    const diff = await sql`select * from "pg_diff"(${original}, ${updated})`;
+    expect(diff).toEqual([
+      {
+        kind: "+",
+        type: "pg_cast",
+        name: "text -> integer",
+        namespace: "",
+        extras: {
+          "+": { method: "f", context: "e", function: "public.int4" },
+          delta: null,
+        },
+      },
+    ]);
+  });
 });

@@ -115,6 +115,18 @@ create view "pg_diff_inspect" as (
         'password', rolPassword
       ) as "extras"
     from pg_authid
+  union
+  select
+      null as "kind",
+      'pg_cast' as "type",
+      castSource::regType || ' -> ' || castTarget::regType as "name",
+      '' as "namespace",
+      jsonb_build_object(
+        'function', castFunc::regProc,
+        'context', castContext,
+        'method', castMethod
+      ) as "extras"
+    from pg_cast
 );
 
 create function "jsonb_delta_fn" (jsonb, jsonb)
