@@ -351,7 +351,7 @@ describe("pg-diff", () => {
       {
         kind: "+",
         type: "pg_description",
-        name: "test a column",
+        name: "test.column a column",
         namespace: "public",
         extras: { "+": { column: "test.column", description: "a column" }, delta: null },
       },

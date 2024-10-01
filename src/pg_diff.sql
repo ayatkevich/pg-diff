@@ -160,7 +160,7 @@ create view "pg_diff_inspect" as (
   select
       null as "kind",
       'pg_description' as "type",
-      objOId::regClass::text || ' ' || description as "name",
+      coalesce(attRelId::regClass || '.' || attName, objOId::regClass::text) || ' ' || description as "name",
       relNamespace::regNamespace::text as "namespace",
       jsonb_build_object(
         'description', description,
