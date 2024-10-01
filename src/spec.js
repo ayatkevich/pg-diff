@@ -289,4 +289,53 @@ describe("pg-diff", () => {
       },
     ]);
   });
+
+  test("add primary key", async () => {
+    const original = await sql`select * from "pg_diff_inspect" where "namespace" = 'public'`;
+
+    await sql`alter table "test" add primary key ("column")`;
+
+    const updated = await sql`select * from "pg_diff_inspect" where "namespace" = 'public'`;
+    const diff = await sql`select * from "pg_diff"(${original}, ${updated})`;
+    expect(diff).toEqual([
+      {
+        kind: "+",
+        type: "pg_constraint",
+        name: "test_pkey",
+        namespace: "public",
+        extras: {
+          "+": {
+            type: "p",
+            index: "test_pkey",
+            domain: "-",
+            parent: null,
+            isLocal: true,
+            onMatch: " ",
+            deferred: false,
+            onDelete: " ",
+            onUpdate: " ",
+            relation: "test",
+            inherited: 0,
+            noInherit: true,
+            validated: true,
+            deferrable: false,
+            definition: 'PRIMARY KEY ("column")',
+            references: "-",
+          },
+          delta: null,
+        },
+      },
+      {
+        kind: "+-",
+        type: "pg_attribute",
+        name: "test.column",
+        namespace: "public",
+        extras: {
+          "+": expect.objectContaining({}),
+          "-": expect.objectContaining({}),
+          delta: { notNull: [true, false] },
+        },
+      },
+    ]);
+  });
 });

@@ -31,6 +31,7 @@ create view "pg_diff_inspect" as (
     from pg_class
       left join pg_am on relAM = pg_am.oid
       left join pg_tablespace on relTableSpace = pg_tablespace.oid
+    where relKind != 'i'
   union
   select
       null as "kind",
@@ -65,6 +66,7 @@ create view "pg_diff_inspect" as (
           and pg_attrDef.adNum = pg_attribute.attNum
     where not attIsDropped
       and attNum > 0
+      and relKind != 'i'
   union
   select
       null as "kind",
@@ -127,6 +129,33 @@ create view "pg_diff_inspect" as (
         'method', castMethod
       ) as "extras"
     from pg_cast
+  union
+  select
+      null as "kind",
+      'pg_constraint' as "type",
+      target.conName as "name",
+      target.conNamespace::regNamespace::text as "namespace",
+      jsonb_build_object(
+        'type', target.conType,
+        'deferrable', target.conDeferrable,
+        'deferred', target.conDeferred,
+        'validated', target.conValidated,
+        'relation', target.conRelId::regClass,
+        'domain', target.conTypId::regType,
+        'index', target.conIndId::regClass,
+        'parent', parent.conName,
+        'references', target.conFRelId::regClass,
+        'onUpdate', target.conFUpdType,
+        'onDelete', target.conFDelType,
+        'onMatch', target.conFMatchType,
+        'isLocal', target.conIsLocal,
+        'inherited', target.conInhCount,
+        'noInherit', target.conNoInherit,
+        'definition', pg_get_constraintDef(target.oid)
+        -- TODO conKey, conFKey, conPFEqOp, conPPEqOp, conFFEqOp, conFDelSetCols, conExclOp
+      ) as "extras"
+    from pg_constraint as target
+      left join pg_constraint as parent on target.conParentId = parent.oid
 );
 
 create function "jsonb_delta_fn" (jsonb, jsonb)
