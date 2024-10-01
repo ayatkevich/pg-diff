@@ -156,6 +156,21 @@ create view "pg_diff_inspect" as (
       ) as "extras"
     from pg_constraint as target
       left join pg_constraint as parent on target.conParentId = parent.oid
+  union
+  select
+      null as "kind",
+      'pg_description' as "type",
+      objOId::regClass::text || ' ' || description as "name",
+      relNamespace::regNamespace::text as "namespace",
+      jsonb_build_object(
+        'description', description,
+        'column', attRelId::regClass || '.' || attName
+      ) as "extras"
+    from pg_description
+      inner join pg_class
+        on objOId = pg_class.oid
+      left join pg_attribute
+        on objOId = attRelId and objSubId = attNum
 );
 
 create function "jsonb_delta_fn" (jsonb, jsonb)

@@ -338,4 +338,30 @@ describe("pg-diff", () => {
       },
     ]);
   });
+
+  test("add comment", async () => {
+    const original = await sql`select * from "pg_diff_inspect" where "namespace" = 'public'`;
+
+    await sql`comment on table "test" is 'a table'`;
+    await sql`comment on column "test"."column" is 'a column'`;
+
+    const updated = await sql`select * from "pg_diff_inspect" where "namespace" = 'public'`;
+    const diff = await sql`select * from "pg_diff"(${original}, ${updated})`;
+    expect(diff).toEqual([
+      {
+        kind: "+",
+        type: "pg_description",
+        name: "test a column",
+        namespace: "public",
+        extras: { "+": { column: "test.column", description: "a column" }, delta: null },
+      },
+      {
+        kind: "+",
+        type: "pg_description",
+        name: "test a table",
+        namespace: "public",
+        extras: { "+": { column: null, description: "a table" }, delta: null },
+      },
+    ]);
+  });
 });
