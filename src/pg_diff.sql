@@ -257,6 +257,24 @@ create view "pg_diff_inspect" as (
     from pg_rewrite
       inner join pg_class
         on ev_class = pg_class.oid
+  union
+  select
+      null as "kind",
+      'pg_trigger' as "type",
+      tgName || ' on ' || tgRelId::regClass::text as "name",
+      relNamespace::regNamespace::text as "namespace",
+      jsonb_build_object(
+        'isClone', tgParentId != 0,
+        'definition', pg_get_triggerDef(pg_trigger.oid),
+        'type', tgType,
+        'enabled', tgEnabled,
+        'isInternal', tgIsInternal,
+        'isDeferral', tgDeferrable,
+        'isDeferred', tgInitDeferred
+      ) as "extras"
+    from pg_trigger
+      inner join pg_class
+        on tgRelId = pg_class.oid
 );
 
 create function "jsonb_delta_fn" (jsonb, jsonb)

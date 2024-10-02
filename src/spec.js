@@ -8,7 +8,7 @@ describe("pg-diff", () => {
   beforeAll(async () => pg.exec(definition));
   afterAll(async () => pg.close());
 
-  test("create table", async () => {
+  test("table", async () => {
     const original = await takeSnapshot(sql);
 
     await sql`create table "test" ()`;
@@ -80,7 +80,7 @@ describe("pg-diff", () => {
     ]);
   });
 
-  test("add column", async () => {
+  test("column", async () => {
     await sql`create table "test" ()`;
 
     const original = await takeSnapshot(sql);
@@ -187,7 +187,7 @@ describe("pg-diff", () => {
     ]);
   });
 
-  test("create function", async () => {
+  test("function", async () => {
     const original = await takeSnapshot(sql);
 
     await sql`create function "test" () returns void language plpgsql as $$begin end$$`;
@@ -232,7 +232,7 @@ describe("pg-diff", () => {
     ]);
   });
 
-  test("create role", async () => {
+  test("role", async () => {
     const original = await takeSnapshot(sql);
 
     await sql`create role "test"`;
@@ -262,7 +262,7 @@ describe("pg-diff", () => {
     ]);
   });
 
-  test("create cast", async () => {
+  test("cast", async () => {
     await sql`create function "int4" (text) returns integer language sql as $$select $1::integer$$`;
     const original = await takeSnapshot(sql);
 
@@ -284,7 +284,7 @@ describe("pg-diff", () => {
     ]);
   });
 
-  test("add primary key", async () => {
+  test("primary key", async () => {
     const original = await takeSnapshot(sql);
 
     await sql`alter table "test" add primary key ("column")`;
@@ -333,7 +333,7 @@ describe("pg-diff", () => {
     ]);
   });
 
-  test("add comment", async () => {
+  test("comment", async () => {
     const original = await takeSnapshot(sql);
 
     await sql`comment on table "test" is 'a table'`;
@@ -359,7 +359,7 @@ describe("pg-diff", () => {
     ]);
   });
 
-  test("add operator", async () => {
+  test("operator", async () => {
     const original = await takeSnapshot(sql);
 
     await sql`create operator <<< (leftArg = integer, rightArg = integer, procedure = int4lt)`;
@@ -393,7 +393,7 @@ describe("pg-diff", () => {
     ]);
   });
 
-  test("add policy", async () => {
+  test("policy", async () => {
     const original = await takeSnapshot(sql);
 
     await sql`create policy "test" on "test" for select to "test" using (true)`;
@@ -420,7 +420,7 @@ describe("pg-diff", () => {
     ]);
   });
 
-  test("add publication", async () => {
+  test("publication", async () => {
     const original = await takeSnapshot(sql);
 
     await sql`create publication "test" for table "test"`;
@@ -457,7 +457,7 @@ describe("pg-diff", () => {
     ]);
   });
 
-  test("add rule", async () => {
+  test("rule", async () => {
     const original = await takeSnapshot(sql);
 
     await sql`create rule "test" as on delete to "test" do instead nothing`;
@@ -476,6 +476,37 @@ describe("pg-diff", () => {
             enabled: "O",
             isInstead: true,
             definition: "CREATE RULE test AS\n    ON DELETE TO public.test DO INSTEAD NOTHING;",
+          },
+          delta: null,
+        },
+      },
+    ]);
+  });
+
+  test("trigger", async () => {
+    await sql`create function test_trigger() returns trigger language plpgsql as $$begin return new; end$$`;
+    const original = await takeSnapshot(sql);
+
+    await sql`create trigger "test" before insert on "test" for each row execute procedure test_trigger()`;
+
+    const updated = await takeSnapshot(sql);
+
+    expect(await diff(sql, { original, updated })).toEqual([
+      {
+        kind: "+",
+        type: "pg_trigger",
+        name: "test on test",
+        namespace: "public",
+        extras: {
+          "+": {
+            type: 7,
+            enabled: "O",
+            isClone: false,
+            definition:
+              "CREATE TRIGGER test BEFORE INSERT ON public.test FOR EACH ROW EXECUTE FUNCTION test_trigger()",
+            isDeferral: false,
+            isDeferred: false,
+            isInternal: false,
           },
           delta: null,
         },
