@@ -457,6 +457,32 @@ describe("pg-diff", () => {
     ]);
   });
 
+  test("add rule", async () => {
+    const original = await takeSnapshot(sql);
+
+    await sql`create rule "test" as on delete to "test" do instead nothing`;
+
+    const updated = await takeSnapshot(sql);
+
+    expect(await diff(sql, { original, updated })).toEqual([
+      {
+        kind: "+",
+        type: "pg_rewrite",
+        name: "test on test",
+        namespace: "public",
+        extras: {
+          "+": {
+            type: "4",
+            enabled: "O",
+            isInstead: true,
+            definition: "CREATE RULE test AS\n    ON DELETE TO public.test DO INSTEAD NOTHING;",
+          },
+          delta: null,
+        },
+      },
+    ]);
+  });
+
   test("template", async () => {
     const original = await takeSnapshot(sql);
 

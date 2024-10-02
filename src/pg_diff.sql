@@ -242,6 +242,21 @@ create view "pg_diff_inspect" as (
     from pg_publication
       inner join pg_publication_namespace
         on pg_publication.oid = pnPubId
+  union
+  select
+      null as "kind",
+      'pg_rewrite' as "type",
+      ruleName || ' on ' || ev_class::regClass::text as "name",
+      relNamespace::regNamespace::text as "namespace",
+      jsonb_build_object(
+        'type', ev_type,
+        'enabled', ev_enabled,
+        'isInstead', is_instead,
+        'definition', pg_get_ruleDef(pg_rewrite.oid)
+      ) as "extras"
+    from pg_rewrite
+      inner join pg_class
+        on ev_class = pg_class.oid
 );
 
 create function "jsonb_delta_fn" (jsonb, jsonb)
