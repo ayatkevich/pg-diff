@@ -269,6 +269,7 @@ describe("pg-diff", () => {
     await sql`create cast (text as integer) with function int4(text)`;
 
     const updated = await takeSnapshot(sql);
+
     expect(await diff(sql, { original, updated })).toEqual([
       {
         kind: "+",
@@ -289,6 +290,7 @@ describe("pg-diff", () => {
     await sql`alter table "test" add primary key ("column")`;
 
     const updated = await takeSnapshot(sql);
+
     expect(await diff(sql, { original, updated })).toEqual([
       {
         kind: "+",
@@ -338,6 +340,7 @@ describe("pg-diff", () => {
     await sql`comment on column "test"."column" is 'a column'`;
 
     const updated = await takeSnapshot(sql);
+
     expect(await diff(sql, { original, updated })).toEqual([
       {
         kind: "+",
@@ -362,6 +365,7 @@ describe("pg-diff", () => {
     await sql`create operator <<< (leftArg = integer, rightArg = integer, procedure = int4lt)`;
 
     const updated = await takeSnapshot(sql);
+
     expect(await diff(sql, { original, updated })).toEqual([
       {
         kind: "+",
@@ -395,6 +399,7 @@ describe("pg-diff", () => {
     await sql`create policy "test" on "test" for select to "test" using (true)`;
 
     const updated = await takeSnapshot(sql);
+
     expect(await diff(sql, { original, updated })).toEqual([
       {
         kind: "+",
@@ -422,6 +427,7 @@ describe("pg-diff", () => {
     await sql`create publication "public" for tables in schema "public"`;
 
     const updated = await takeSnapshot(sql);
+
     expect(await diff(sql, { original, updated })).toEqual([
       {
         kind: "+",
@@ -455,6 +461,7 @@ describe("pg-diff", () => {
     const original = await takeSnapshot(sql);
 
     const updated = await takeSnapshot(sql);
+
     expect(await diff(sql, { original, updated }));
   });
 });
