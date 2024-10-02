@@ -196,6 +196,22 @@ create view "pg_diff_inspect" as (
         on target.oprCom = commutator.oid
       left join pg_operator as negator
         on target.oprNegate = negator.oid
+  union
+  select
+      null as "kind",
+      'pg_policy' as "type",
+      polName || ' on ' || polRelId::regClass::text as "name",
+      relNamespace::regNamespace::text as "namespace",
+      jsonb_build_object(
+        'command', polCmd,
+        'isPermissive', polPermissive,
+        'roles', polRoles::regRole[],
+        'using', pg_get_expr(polQual, polRelId, true),
+        'withCheck', pg_get_expr(polWithCheck, polRelId, true)
+      ) as "extras"
+    from pg_policy
+      inner join pg_class
+        on polRelId = pg_class.oid
 );
 
 create function "jsonb_delta_fn" (jsonb, jsonb)

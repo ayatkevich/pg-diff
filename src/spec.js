@@ -398,4 +398,39 @@ describe("pg-diff", () => {
       },
     ]);
   });
+
+  test("add policy", async () => {
+    const original = await sql`select * from "pg_diff_inspect" where "namespace" = 'public'`;
+
+    await sql`create policy "test" on "test" for select to "test" using (true)`;
+
+    const updated = await sql`select * from "pg_diff_inspect" where "namespace" = 'public'`;
+    const diff = await sql`select * from "pg_diff"(${original}, ${updated})`;
+    expect(diff).toEqual([
+      {
+        kind: "+",
+        type: "pg_policy",
+        name: "test on test",
+        namespace: "public",
+        extras: {
+          "+": {
+            roles: ["test"],
+            using: "true",
+            command: "r",
+            withCheck: null,
+            isPermissive: true,
+          },
+          delta: null,
+        },
+      },
+    ]);
+  });
+
+  test("", async () => {
+    const original = await sql`select * from "pg_diff_inspect" where "namespace" = 'public'`;
+
+    const updated = await sql`select * from "pg_diff_inspect" where "namespace" = 'public'`;
+    const diff = await sql`select * from "pg_diff"(${original}, ${updated})`;
+    expect(diff);
+  });
 });
