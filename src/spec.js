@@ -1,6 +1,6 @@
 import { PGlite } from "@electric-sql/pglite";
 import { afterAll, beforeAll, describe, expect, test } from "@jest/globals";
-import { definition, diff, takeSnapshot } from "./index.js";
+import { definition, diff, snapshot } from "./index.js";
 
 describe("pg-diff", () => {
   const pg = new PGlite();
@@ -9,11 +9,11 @@ describe("pg-diff", () => {
   afterAll(async () => pg.close());
 
   test("table", async () => {
-    const original = await takeSnapshot(sql);
+    const original = await snapshot(sql);
 
     await sql`create table "test" ()`;
 
-    const updated = await takeSnapshot(sql);
+    const updated = await snapshot(sql);
 
     expect(await diff(sql, { original, updated })).toEqual([
       {
@@ -45,11 +45,11 @@ describe("pg-diff", () => {
   });
 
   test("drop table", async () => {
-    const original = await takeSnapshot(sql);
+    const original = await snapshot(sql);
 
     await sql`drop table "test"`;
 
-    const updated = await takeSnapshot(sql);
+    const updated = await snapshot(sql);
 
     expect(await diff(sql, { original, updated })).toEqual([
       {
@@ -83,11 +83,11 @@ describe("pg-diff", () => {
   test("column", async () => {
     await sql`create table "test" ()`;
 
-    const original = await takeSnapshot(sql);
+    const original = await snapshot(sql);
 
     await sql`alter table "test" add column "column" text`;
 
-    const updated = await takeSnapshot(sql);
+    const updated = await snapshot(sql);
 
     expect(await diff(sql, { original, updated })).toEqual([
       {
@@ -124,11 +124,11 @@ describe("pg-diff", () => {
   });
 
   test("change column type", async () => {
-    const original = await takeSnapshot(sql);
+    const original = await snapshot(sql);
 
     await sql`alter table "test" alter column "column" type varchar`;
 
-    const updated = await takeSnapshot(sql);
+    const updated = await snapshot(sql);
 
     expect(await diff(sql, { original, updated })).toEqual([
       {
@@ -188,11 +188,11 @@ describe("pg-diff", () => {
   });
 
   test("function", async () => {
-    const original = await takeSnapshot(sql);
+    const original = await snapshot(sql);
 
     await sql`create function "test" () returns void language plpgsql as $$begin end$$`;
 
-    const updated = await takeSnapshot(sql);
+    const updated = await snapshot(sql);
 
     expect(await diff(sql, { original, updated })).toEqual([
       {
@@ -233,11 +233,11 @@ describe("pg-diff", () => {
   });
 
   test("role", async () => {
-    const original = await takeSnapshot(sql);
+    const original = await snapshot(sql);
 
     await sql`create role "test"`;
 
-    const updated = await takeSnapshot(sql);
+    const updated = await snapshot(sql);
 
     expect(await diff(sql, { original, updated })).toEqual([
       {
@@ -264,11 +264,11 @@ describe("pg-diff", () => {
 
   test("cast", async () => {
     await sql`create function "int4" (text) returns integer language sql as $$select $1::integer$$`;
-    const original = await takeSnapshot(sql);
+    const original = await snapshot(sql);
 
     await sql`create cast (text as integer) with function int4(text)`;
 
-    const updated = await takeSnapshot(sql);
+    const updated = await snapshot(sql);
 
     expect(await diff(sql, { original, updated })).toEqual([
       {
@@ -285,11 +285,11 @@ describe("pg-diff", () => {
   });
 
   test("primary key", async () => {
-    const original = await takeSnapshot(sql);
+    const original = await snapshot(sql);
 
     await sql`alter table "test" add primary key ("column")`;
 
-    const updated = await takeSnapshot(sql);
+    const updated = await snapshot(sql);
 
     expect(await diff(sql, { original, updated })).toEqual([
       {
@@ -334,12 +334,12 @@ describe("pg-diff", () => {
   });
 
   test("comment", async () => {
-    const original = await takeSnapshot(sql);
+    const original = await snapshot(sql);
 
     await sql`comment on table "test" is 'a table'`;
     await sql`comment on column "test"."column" is 'a column'`;
 
-    const updated = await takeSnapshot(sql);
+    const updated = await snapshot(sql);
 
     expect(await diff(sql, { original, updated })).toEqual([
       {
@@ -360,11 +360,11 @@ describe("pg-diff", () => {
   });
 
   test("operator", async () => {
-    const original = await takeSnapshot(sql);
+    const original = await snapshot(sql);
 
     await sql`create operator <<< (leftArg = integer, rightArg = integer, procedure = int4lt)`;
 
-    const updated = await takeSnapshot(sql);
+    const updated = await snapshot(sql);
 
     expect(await diff(sql, { original, updated })).toEqual([
       {
@@ -394,11 +394,11 @@ describe("pg-diff", () => {
   });
 
   test("policy", async () => {
-    const original = await takeSnapshot(sql);
+    const original = await snapshot(sql);
 
     await sql`create policy "test" on "test" for select to "test" using (true)`;
 
-    const updated = await takeSnapshot(sql);
+    const updated = await snapshot(sql);
 
     expect(await diff(sql, { original, updated })).toEqual([
       {
@@ -421,12 +421,12 @@ describe("pg-diff", () => {
   });
 
   test("publication", async () => {
-    const original = await takeSnapshot(sql);
+    const original = await snapshot(sql);
 
     await sql`create publication "test" for table "test"`;
     await sql`create publication "public" for tables in schema "public"`;
 
-    const updated = await takeSnapshot(sql);
+    const updated = await snapshot(sql);
 
     expect(await diff(sql, { original, updated })).toEqual([
       {
@@ -458,11 +458,11 @@ describe("pg-diff", () => {
   });
 
   test("rule", async () => {
-    const original = await takeSnapshot(sql);
+    const original = await snapshot(sql);
 
     await sql`create rule "test" as on delete to "test" do instead nothing`;
 
-    const updated = await takeSnapshot(sql);
+    const updated = await snapshot(sql);
 
     expect(await diff(sql, { original, updated })).toEqual([
       {
@@ -485,11 +485,11 @@ describe("pg-diff", () => {
 
   test("trigger", async () => {
     await sql`create function test_trigger() returns trigger language plpgsql as $$begin return new; end$$`;
-    const original = await takeSnapshot(sql);
+    const original = await snapshot(sql);
 
     await sql`create trigger "test" before insert on "test" for each row execute procedure test_trigger()`;
 
-    const updated = await takeSnapshot(sql);
+    const updated = await snapshot(sql);
 
     expect(await diff(sql, { original, updated })).toEqual([
       {
@@ -515,9 +515,9 @@ describe("pg-diff", () => {
   });
 
   test("template", async () => {
-    const original = await takeSnapshot(sql);
+    const original = await snapshot(sql);
 
-    const updated = await takeSnapshot(sql);
+    const updated = await snapshot(sql);
 
     expect(await diff(sql, { original, updated }));
   });
