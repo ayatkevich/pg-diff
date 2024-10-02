@@ -1,11 +1,3 @@
-create type "pg_diff_record" as (
-  "kind" text,
-  "type" text,
-  "name" text,
-  "namespace" text,
-  "extras" jsonb
-);
-
 create view "pg_diff_inspect" as (
   select
       null as "kind",
@@ -311,7 +303,7 @@ create aggregate jsonb_delta (jsonb) (
 );
 
 create function "pg_diff" (jsonb, jsonb)
-returns setof "pg_diff_record"
+returns setof "pg_diff_inspect"
 language sql as $$
   select
       case
@@ -329,22 +321,22 @@ language sql as $$
       )::jsonb as "extras"
     from (
       select '-' as "kind", "type", "name", "namespace", "extras" from (
-        select * from jsonb_populate_recordSet(null::"pg_diff_record", $1)
+        select * from jsonb_populate_recordSet(null::"pg_diff_inspect", $1)
         except
-        select * from jsonb_populate_recordSet(null::"pg_diff_record", $2)
+        select * from jsonb_populate_recordSet(null::"pg_diff_inspect", $2)
       )
       union
       select '+' as "kind", "type", "name", "namespace", "extras" from (
-        select * from jsonb_populate_recordSet(null::"pg_diff_record", $2)
+        select * from jsonb_populate_recordSet(null::"pg_diff_inspect", $2)
         except
-        select * from jsonb_populate_recordSet(null::"pg_diff_record", $1)
+        select * from jsonb_populate_recordSet(null::"pg_diff_inspect", $1)
       )
     )
     group by "type", "name", "namespace"
 $$;
 
 create function "pg_diff" (jsonb)
-returns setof "pg_diff_record"
+returns setof "pg_diff_inspect"
 language sql as $$
   select "pg_diff"($1, (select jsonb_agg(to_jsonb("pg_diff_inspect")) from "pg_diff_inspect"))
 $$;
