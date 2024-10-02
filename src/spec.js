@@ -1,6 +1,6 @@
 import { PGlite } from "@electric-sql/pglite";
 import { afterAll, beforeAll, describe, expect, test } from "@jest/globals";
-import { definition } from "./index.js";
+import { definition, diff, takeSnapshot } from "./index.js";
 
 describe("pg-diff", () => {
   const pg = new PGlite();
@@ -9,14 +9,13 @@ describe("pg-diff", () => {
   afterAll(async () => pg.close());
 
   test("create table", async () => {
-    const original = await sql`select * from "pg_diff_inspect" where "namespace" = 'public'`;
+    const original = await takeSnapshot(sql);
 
     await sql`create table "test" ()`;
 
-    const updated = await sql`select * from "pg_diff_inspect" where "namespace" = 'public'`;
+    const updated = await takeSnapshot(sql);
 
-    const diff = await sql`select * from "pg_diff"(${original}, ${updated})`;
-    expect(diff).toEqual([
+    expect(await diff(sql, { original, updated })).toEqual([
       {
         kind: "+",
         type: "pg_class",
@@ -46,14 +45,13 @@ describe("pg-diff", () => {
   });
 
   test("drop table", async () => {
-    const original = await sql`select * from "pg_diff_inspect" where "namespace" = 'public'`;
+    const original = await takeSnapshot(sql);
 
     await sql`drop table "test"`;
 
-    const updated = await sql`select * from "pg_diff_inspect" where "namespace" = 'public'`;
+    const updated = await takeSnapshot(sql);
 
-    const diff = await sql`select * from "pg_diff"(${original}, ${updated})`;
-    expect(diff).toEqual([
+    expect(await diff(sql, { original, updated })).toEqual([
       {
         kind: "-",
         type: "pg_class",
@@ -85,14 +83,13 @@ describe("pg-diff", () => {
   test("add column", async () => {
     await sql`create table "test" ()`;
 
-    const original = await sql`select * from "pg_diff_inspect" where "namespace" = 'public'`;
+    const original = await takeSnapshot(sql);
 
     await sql`alter table "test" add column "column" text`;
 
-    const updated = await sql`select * from "pg_diff_inspect" where "namespace" = 'public'`;
+    const updated = await takeSnapshot(sql);
 
-    const diff = await sql`select * from "pg_diff"(${original}, ${updated})`;
-    expect(diff).toEqual([
+    expect(await diff(sql, { original, updated })).toEqual([
       {
         kind: "+",
         type: "pg_attribute",
@@ -127,14 +124,13 @@ describe("pg-diff", () => {
   });
 
   test("change column type", async () => {
-    const original = await sql`select * from "pg_diff_inspect" where "namespace" = 'public'`;
+    const original = await takeSnapshot(sql);
 
     await sql`alter table "test" alter column "column" type varchar`;
 
-    const updated = await sql`select * from "pg_diff_inspect" where "namespace" = 'public'`;
+    const updated = await takeSnapshot(sql);
 
-    const diff = await sql`select * from "pg_diff"(${original}, ${updated})`;
-    expect(diff).toEqual([
+    expect(await diff(sql, { original, updated })).toEqual([
       {
         kind: "+-",
         type: "pg_attribute",
@@ -192,14 +188,13 @@ describe("pg-diff", () => {
   });
 
   test("create function", async () => {
-    const original = await sql`select * from "pg_diff_inspect" where "namespace" = 'public'`;
+    const original = await takeSnapshot(sql);
 
     await sql`create function "test" () returns void language plpgsql as $$begin end$$`;
 
-    const updated = await sql`select * from "pg_diff_inspect" where "namespace" = 'public'`;
+    const updated = await takeSnapshot(sql);
 
-    const diff = await sql`select * from "pg_diff"(${original}, ${updated})`;
-    expect(diff).toEqual([
+    expect(await diff(sql, { original, updated })).toEqual([
       {
         kind: "+",
         type: "pg_proc",
@@ -238,14 +233,13 @@ describe("pg-diff", () => {
   });
 
   test("create role", async () => {
-    const original = await sql`select * from "pg_diff_inspect" where "namespace" = ''`;
+    const original = await takeSnapshot(sql);
 
     await sql`create role "test"`;
 
-    const updated = await sql`select * from "pg_diff_inspect" where "namespace" = ''`;
+    const updated = await takeSnapshot(sql);
 
-    const diff = await sql`select * from "pg_diff"(${original}, ${updated})`;
-    expect(diff).toEqual([
+    expect(await diff(sql, { original, updated })).toEqual([
       {
         kind: "+",
         type: "pg_authid",
@@ -270,13 +264,12 @@ describe("pg-diff", () => {
 
   test("create cast", async () => {
     await sql`create function "int4" (text) returns integer language sql as $$select $1::integer$$`;
-    const original = await sql`select * from "pg_diff_inspect" where "namespace" = ''`;
+    const original = await takeSnapshot(sql);
 
     await sql`create cast (text as integer) with function int4(text)`;
 
-    const updated = await sql`select * from "pg_diff_inspect" where "namespace" = ''`;
-    const diff = await sql`select * from "pg_diff"(${original}, ${updated})`;
-    expect(diff).toEqual([
+    const updated = await takeSnapshot(sql);
+    expect(await diff(sql, { original, updated })).toEqual([
       {
         kind: "+",
         type: "pg_cast",
@@ -291,13 +284,12 @@ describe("pg-diff", () => {
   });
 
   test("add primary key", async () => {
-    const original = await sql`select * from "pg_diff_inspect" where "namespace" = 'public'`;
+    const original = await takeSnapshot(sql);
 
     await sql`alter table "test" add primary key ("column")`;
 
-    const updated = await sql`select * from "pg_diff_inspect" where "namespace" = 'public'`;
-    const diff = await sql`select * from "pg_diff"(${original}, ${updated})`;
-    expect(diff).toEqual([
+    const updated = await takeSnapshot(sql);
+    expect(await diff(sql, { original, updated })).toEqual([
       {
         kind: "+",
         type: "pg_constraint",
@@ -340,14 +332,13 @@ describe("pg-diff", () => {
   });
 
   test("add comment", async () => {
-    const original = await sql`select * from "pg_diff_inspect" where "namespace" = 'public'`;
+    const original = await takeSnapshot(sql);
 
     await sql`comment on table "test" is 'a table'`;
     await sql`comment on column "test"."column" is 'a column'`;
 
-    const updated = await sql`select * from "pg_diff_inspect" where "namespace" = 'public'`;
-    const diff = await sql`select * from "pg_diff"(${original}, ${updated})`;
-    expect(diff).toEqual([
+    const updated = await takeSnapshot(sql);
+    expect(await diff(sql, { original, updated })).toEqual([
       {
         kind: "+",
         type: "pg_description",
@@ -366,13 +357,12 @@ describe("pg-diff", () => {
   });
 
   test("add operator", async () => {
-    const original = await sql`select * from "pg_diff_inspect" where "namespace" = 'public'`;
+    const original = await takeSnapshot(sql);
 
     await sql`create operator <<< (leftArg = integer, rightArg = integer, procedure = int4lt)`;
 
-    const updated = await sql`select * from "pg_diff_inspect" where "namespace" = 'public'`;
-    const diff = await sql`select * from "pg_diff"(${original}, ${updated})`;
-    expect(diff).toEqual([
+    const updated = await takeSnapshot(sql);
+    expect(await diff(sql, { original, updated })).toEqual([
       {
         kind: "+",
         type: "pg_operator",
@@ -400,13 +390,12 @@ describe("pg-diff", () => {
   });
 
   test("add policy", async () => {
-    const original = await sql`select * from "pg_diff_inspect" where "namespace" = 'public'`;
+    const original = await takeSnapshot(sql);
 
     await sql`create policy "test" on "test" for select to "test" using (true)`;
 
-    const updated = await sql`select * from "pg_diff_inspect" where "namespace" = 'public'`;
-    const diff = await sql`select * from "pg_diff"(${original}, ${updated})`;
-    expect(diff).toEqual([
+    const updated = await takeSnapshot(sql);
+    expect(await diff(sql, { original, updated })).toEqual([
       {
         kind: "+",
         type: "pg_policy",
@@ -427,14 +416,13 @@ describe("pg-diff", () => {
   });
 
   test("add publication", async () => {
-    const original = await sql`select * from "pg_diff_inspect" where "namespace" = 'public'`;
+    const original = await takeSnapshot(sql);
 
     await sql`create publication "test" for table "test"`;
     await sql`create publication "public" for tables in schema "public"`;
 
-    const updated = await sql`select * from "pg_diff_inspect" where "namespace" = 'public'`;
-    const diff = await sql`select * from "pg_diff"(${original}, ${updated})`;
-    expect(diff).toEqual([
+    const updated = await takeSnapshot(sql);
+    expect(await diff(sql, { original, updated })).toEqual([
       {
         kind: "+",
         type: "pg_publication",
@@ -463,11 +451,10 @@ describe("pg-diff", () => {
     ]);
   });
 
-  test("", async () => {
-    const original = await sql`select * from "pg_diff_inspect" where "namespace" = 'public'`;
+  test("template", async () => {
+    const original = await takeSnapshot(sql);
 
-    const updated = await sql`select * from "pg_diff_inspect" where "namespace" = 'public'`;
-    const diff = await sql`select * from "pg_diff"(${original}, ${updated})`;
-    expect(diff);
+    const updated = await takeSnapshot(sql);
+    expect(await diff(sql, { original, updated }));
   });
 });
