@@ -426,6 +426,43 @@ describe("pg-diff", () => {
     ]);
   });
 
+  test("add publication", async () => {
+    const original = await sql`select * from "pg_diff_inspect" where "namespace" = 'public'`;
+
+    await sql`create publication "test" for table "test"`;
+    await sql`create publication "public" for tables in schema "public"`;
+
+    const updated = await sql`select * from "pg_diff_inspect" where "namespace" = 'public'`;
+    const diff = await sql`select * from "pg_diff"(${original}, ${updated})`;
+    expect(diff).toEqual([
+      {
+        kind: "+",
+        type: "pg_publication",
+        name: "test on test",
+        namespace: "public",
+        extras: {
+          "+": {
+            owner: "postgres",
+            isDelete: true,
+            isInsert: true,
+            isUpdate: true,
+            isViaRoot: false,
+            isTruncate: true,
+            isAllTables: false,
+          },
+          delta: null,
+        },
+      },
+      {
+        kind: "+",
+        type: "pg_publication",
+        name: "public on schema public",
+        namespace: "public",
+        extras: { "+": {}, delta: null },
+      },
+    ]);
+  });
+
   test("", async () => {
     const original = await sql`select * from "pg_diff_inspect" where "namespace" = 'public'`;
 

@@ -212,6 +212,36 @@ create view "pg_diff_inspect" as (
     from pg_policy
       inner join pg_class
         on polRelId = pg_class.oid
+  union
+  select
+      null as "kind",
+      'pg_publication' as "type",
+      pubName || ' on ' || prRelId::regClass::text as "name",
+      relNamespace::regNamespace::text as "namespace",
+      jsonb_build_object(
+        'owner', pubOwner::regRole,
+        'isAllTables', pubAllTables,
+        'isInsert', pubInsert,
+        'isUpdate', pubUpdate,
+        'isDelete', pubDelete,
+        'isTruncate', pubTruncate,
+        'isViaRoot', pubViaRoot
+      ) as "extras"
+    from pg_publication
+      inner join pg_publication_rel
+        on pg_publication.oid = prPubId
+      inner join pg_class
+        on prRelId = pg_class.oid
+  union
+  select
+      null as "kind",
+      'pg_publication' as "type",
+      pubName || ' on schema ' || pnNspId::regNamespace::text as "name",
+      pnNspId::regNamespace::text as "namespace",
+      jsonb_build_object() as "extras"
+    from pg_publication
+      inner join pg_publication_namespace
+        on pg_publication.oid = pnPubId
 );
 
 create function "jsonb_delta_fn" (jsonb, jsonb)
