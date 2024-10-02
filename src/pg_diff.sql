@@ -171,6 +171,31 @@ create view "pg_diff_inspect" as (
         on objOId = pg_class.oid
       left join pg_attribute
         on objOId = attRelId and objSubId = attNum
+  union
+  select
+      null as "kind",
+      'pg_operator' as "type",
+      target.oprName as "name",
+      target.oprNamespace::regNamespace::text as "namespace",
+      jsonb_build_object(
+        'owner', target.oprOwner::regRole,
+        'kind', target.oprKind,
+        'canMerge', target.oprCanMerge,
+        'canHash', target.oprCanHash,
+        'left', target.oprLeft::regType,
+        'right', target.oprRight::regType,
+        'result', target.oprResult::regType,
+        'commutator', commutator.oprName,
+        'negator', negator.oprName,
+        'code', target.oprCode,
+        'restriction', target.oprRest,
+        'join', target.oprJoin
+      ) as "extras"
+    from pg_operator as target
+      left join pg_operator as commutator
+        on target.oprCom = commutator.oid
+      left join pg_operator as negator
+        on target.oprNegate = negator.oid
 );
 
 create function "jsonb_delta_fn" (jsonb, jsonb)

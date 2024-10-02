@@ -364,4 +364,38 @@ describe("pg-diff", () => {
       },
     ]);
   });
+
+  test("add operator", async () => {
+    const original = await sql`select * from "pg_diff_inspect" where "namespace" = 'public'`;
+
+    await sql`create operator <<< (leftArg = integer, rightArg = integer, procedure = int4lt)`;
+
+    const updated = await sql`select * from "pg_diff_inspect" where "namespace" = 'public'`;
+    const diff = await sql`select * from "pg_diff"(${original}, ${updated})`;
+    expect(diff).toEqual([
+      {
+        kind: "+",
+        type: "pg_operator",
+        name: "<<<",
+        namespace: "public",
+        extras: {
+          "+": {
+            code: "int4lt",
+            join: "-",
+            kind: "b",
+            left: "integer",
+            owner: "postgres",
+            right: "integer",
+            result: "boolean",
+            canHash: false,
+            negator: null,
+            canMerge: false,
+            commutator: null,
+            restriction: "-",
+          },
+          delta: null,
+        },
+      },
+    ]);
+  });
 });
