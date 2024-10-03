@@ -2,7 +2,7 @@
   "type": "module",
   "private": false,
   "name": "@ayatkevich/pg-diff",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "author": "Alex Yatkevich",
   "license": "MIT",
   "main": "src/index.js",
