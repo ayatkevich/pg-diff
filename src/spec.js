@@ -1,11 +1,14 @@
 import { PGlite } from "@electric-sql/pglite";
+// @ts-ignore
+import { citext } from "@electric-sql/pglite/contrib/citext";
 import { afterAll, beforeAll, describe, expect, test } from "@jest/globals";
 import { definition as slon } from "pg-slon";
 import postgres from "postgres";
 import { definition, diff, inspect } from "./index.js";
 
 describe("pg-diff", () => {
-  const pg = new PGlite();
+  // @ts-ignore
+  const pg = new PGlite({ extensions: [citext] });
   const sql = async (
     /** @type {TemplateStringsArray} */ template,
     /** @type {any[]} */ ...params
@@ -907,11 +910,11 @@ describe("pg-diff", () => {
   });
 
   test("sequence", async () => {
-    await sql`DROP SEQUENCE IF EXISTS test_sequence`;
+    await sql`drop sequence if exists test_sequence`;
 
     const before = await inspect(sql);
 
-    await sql`CREATE SEQUENCE test_sequence START 100 INCREMENT 50`;
+    await sql`create sequence test_sequence start 100 increment 50`;
 
     const after = await inspect(sql);
 
@@ -934,6 +937,31 @@ describe("pg-diff", () => {
         },
       },
     ]);
+  });
+
+  test("extension", async () => {
+    const before = await inspect(sql);
+
+    await sql`create extension if not exists citext`;
+
+    const after = await inspect(sql);
+
+    const result = await diff(sql, { left: before, right: after });
+
+    expect(result).toEqual(
+      expect.arrayContaining([
+        {
+          kind: "+",
+          type: "pg_extension",
+          name: "citext",
+          namespace: "public",
+          extras: {
+            "+": { owner: "postgres", config: null, version: "1.6", condition: null },
+            delta: null,
+          },
+        },
+      ])
+    );
   });
 
   test("template", async () => {

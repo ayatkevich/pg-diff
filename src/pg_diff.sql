@@ -325,6 +325,19 @@ create or replace view "pg_diff_inspect" as (
     from pg_sequence
       inner join pg_class on seqRelId = pg_class.oid
     where relKind = 'S'
+  union
+  select
+      null as "kind",
+      'pg_extension' as "type",
+      extName as "name",
+      extNamespace::regNamespace::text as "namespace",
+      jsonb_build_object(
+        'owner', extOwner::regRole,
+        'version', extVersion,
+        'config', extConfig::regClass[],
+        'condition', extCondition
+      ) as "extras"
+    from pg_extension
 );
 
 create or replace function "jsonb_delta_fn" ("~state" jsonb, "~value" jsonb)
