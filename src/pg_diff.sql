@@ -308,6 +308,23 @@ create or replace view "pg_diff_inspect" as (
     where typType != 'b'
       and relKind is distinct from 'r'
       and relKind is distinct from 'v'
+  union
+  select
+      null as "kind",
+      'pg_sequence' as "type",
+      seqRelId::regClass::text as "name",
+      relNamespace::regNamespace::text as "namespace",
+      jsonb_build_object(
+        'start', seqStart,
+        'increment', seqIncrement,
+        'maxValue', seqMax,
+        'minValue', seqMin,
+        'cacheValue', seqCache,
+        'isCycled', seqCycle
+      ) as "extras"
+    from pg_sequence
+      inner join pg_class on seqRelId = pg_class.oid
+    where relKind = 'S'
 );
 
 create or replace function "jsonb_delta_fn" ("~state" jsonb, "~value" jsonb)

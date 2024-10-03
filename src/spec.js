@@ -727,6 +727,10 @@ describe("pg-diff", () => {
         name: "slon_object_constructor(slon_symbol, slon_object): slon_object",
       }),
       expect.objectContaining({
+        type: "pg_sequence",
+        name: "slon_index_seq",
+      }),
+      expect.objectContaining({
         type: "pg_operator",
         name: "text | text = slon_object",
       }),
@@ -898,6 +902,36 @@ describe("pg-diff", () => {
         name: "jsonb_delta_fn(jsonb, jsonb): jsonb",
         namespace: "public",
         extras: expect.objectContaining({ kind: "f" }),
+      },
+    ]);
+  });
+
+  test("sequence", async () => {
+    await sql`DROP SEQUENCE IF EXISTS test_sequence`;
+
+    const before = await inspect(sql);
+
+    await sql`CREATE SEQUENCE test_sequence START 100 INCREMENT 50`;
+
+    const after = await inspect(sql);
+
+    expect(await diff(sql, { left: before, right: after })).toEqual([
+      {
+        kind: "+",
+        type: "pg_sequence",
+        name: "test_sequence",
+        namespace: "public",
+        extras: {
+          "+": {
+            start: 100,
+            isCycled: false,
+            maxValue: 9223372036854776000,
+            minValue: 1,
+            increment: 50,
+            cacheValue: 1,
+          },
+          delta: null,
+        },
       },
     ]);
   });
