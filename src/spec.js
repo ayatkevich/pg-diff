@@ -727,10 +727,6 @@ describe("pg-diff", () => {
         name: "text | text = slon_object",
       }),
       expect.objectContaining({
-        type: "pg_attribute",
-        name: "slon_index_seq.is_called",
-      }),
-      expect.objectContaining({
         type: "pg_proc",
         name: "slon_object_constructor(slon_object, text): slon_object",
       }),
@@ -799,10 +795,6 @@ describe("pg-diff", () => {
         name: "slon_related_to_fkey", // cspell:disable-line
       }),
       expect.objectContaining({
-        type: "pg_attribute",
-        name: "slon_index_seq.last_value",
-      }),
-      expect.objectContaining({
         type: "pg_proc",
         name: "slon_object_constructor(slon_symbol, slon_symbol): slon_object",
       }),
@@ -851,10 +843,6 @@ describe("pg-diff", () => {
         name: "- & slon_object = slon_node",
       }),
       expect.objectContaining({
-        type: "pg_class",
-        name: "slon_index_seq",
-      }),
-      expect.objectContaining({
         type: "pg_attribute",
         name: "slon.index",
       }),
@@ -865,10 +853,6 @@ describe("pg-diff", () => {
       expect.objectContaining({
         type: "pg_operator",
         name: "slon_object = slon_object = boolean",
-      }),
-      expect.objectContaining({
-        type: "pg_attribute",
-        name: "slon_index_seq.log_cnt",
       }),
       expect.objectContaining({
         type: "pg_operator",

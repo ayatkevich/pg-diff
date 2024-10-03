@@ -23,7 +23,7 @@ create view "pg_diff_inspect" as (
     from pg_class
       left join pg_am on relAM = pg_am.oid
       left join pg_tablespace on relTableSpace = pg_tablespace.oid
-    where relKind not in ('i', 'c')
+    where relKind not in ('i', 'c', 'S')
   union
   select
       null as "kind",
@@ -58,7 +58,7 @@ create view "pg_diff_inspect" as (
           and pg_attrDef.adNum = pg_attribute.attNum
     where not attIsDropped
       and attNum > 0
-      and relKind not in ('i', 'c')
+      and relKind not in ('i', 'c', 'S')
   union
   select
       null as "kind",
