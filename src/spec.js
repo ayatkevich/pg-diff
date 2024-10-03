@@ -910,6 +910,27 @@ describe("pg-diff", () => {
     ]);
   });
 
+  test("aggregate", async () => {
+    const before = await snapshot(sql);
+
+    expect(before.filter(({ name }) => name.match(/jsonb_delta/))).toEqual([
+      {
+        kind: null,
+        type: "pg_proc",
+        name: "jsonb_delta_fn(jsonb, jsonb): jsonb",
+        namespace: "public",
+        extras: expect.objectContaining({ kind: "f" }),
+      },
+      {
+        kind: null,
+        type: "pg_proc",
+        name: "jsonb_delta(jsonb): jsonb",
+        namespace: "public",
+        extras: expect.objectContaining({ kind: "a" }),
+      },
+    ]);
+  });
+
   test("template", async () => {
     const before = await snapshot(sql);
 

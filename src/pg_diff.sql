@@ -337,7 +337,7 @@ language sql as $$
   end
 $$;
 
-create aggregate jsonb_delta (jsonb) (
+create aggregate "jsonb_delta" (jsonb) (
   sFunc = "jsonb_delta_fn"(jsonb, jsonb),
   sType = jsonb
 );
@@ -355,8 +355,8 @@ language sql as $$
       "namespace",
       jsonb_object_agg("kind", "extras") || jsonb_build_object(
         'delta', case
-          when jsonb_delta("extras") = any_value("extras") then null
-          else jsonb_delta("extras")
+          when "jsonb_delta"("extras") = any_value("extras") then null
+          else "jsonb_delta"("extras")
         end
       )::jsonb as "extras"
     from (
