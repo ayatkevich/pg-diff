@@ -338,6 +338,27 @@ create or replace view "pg_diff_inspect" as (
         'condition', extCondition
       ) as "extras"
     from pg_extension
+  union
+  select
+      null as "kind",
+      'pg_database' as "type",
+      datName as "name",
+      '' as "namespace",
+      jsonb_build_object(
+        'dba', datDba::regRole,
+        'encoding', pg_encoding_to_char(encoding),
+        'localeProvider', datLocProvider,
+        'isTemplate', datIsTemplate,
+        'allowConnections', datAllowConn,
+        'connectionLimit', datConnLimit,
+        'collate', datCollate,
+        'lcType', datCType,
+        'icuLocale', datICULocale,
+        'icuRules', datICURules,
+        'collVersion', datCollVersion,
+        'acl', datAcl
+      ) as "extras"
+    from pg_database
 );
 
 create or replace function "jsonb_delta_fn" ("~state" jsonb, "~value" jsonb)

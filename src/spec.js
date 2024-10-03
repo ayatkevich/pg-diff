@@ -964,6 +964,42 @@ describe("pg-diff", () => {
     );
   });
 
+  test("database", async () => {
+    const before = await inspect(sql);
+
+    await sql`create database "test_db"`;
+
+    const after = await inspect(sql);
+
+    const result = await diff(sql, { left: before, right: after });
+
+    expect(result).toEqual([
+      {
+        kind: "+",
+        type: "pg_database",
+        name: "test_db",
+        namespace: "",
+        extras: {
+          "+": {
+            acl: null,
+            dba: "postgres",
+            lcType: "C.UTF-8",
+            collate: "C",
+            encoding: "UTF8",
+            icuRules: null,
+            icuLocale: null,
+            isTemplate: false,
+            collVersion: null,
+            localeProvider: "c",
+            connectionLimit: -1,
+            allowConnections: true,
+          },
+          delta: null,
+        },
+      },
+    ]);
+  });
+
   test("template", async () => {
     const before = await inspect(sql);
 
