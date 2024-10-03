@@ -507,7 +507,6 @@ describe("pg-diff", () => {
               "CREATE TRIGGER test BEFORE INSERT ON public.test FOR EACH ROW EXECUTE FUNCTION test_trigger()",
             isDeferral: false,
             isDeferred: false,
-            isInternal: false,
           },
           delta: null,
         },
@@ -756,10 +755,6 @@ describe("pg-diff", () => {
         name: "slon_node_constructor(slon_object): slon_node",
       }),
       expect.objectContaining({
-        type: "pg_trigger",
-        name: "RI_ConstraintTrigger_c_16474 on slon",
-      }),
-      expect.objectContaining({
         type: "pg_proc",
         name: "slon_object_constructor(text, slon_object): slon_object",
       }),
@@ -770,10 +765,6 @@ describe("pg-diff", () => {
       expect.objectContaining({
         type: "pg_proc",
         name: "slon_object_constructor(slon_object, slon_symbol): slon_object",
-      }),
-      expect.objectContaining({
-        type: "pg_trigger",
-        name: "RI_ConstraintTrigger_a_16471 on slon",
       }),
       expect.objectContaining({
         type: "pg_operator",
@@ -800,16 +791,12 @@ describe("pg-diff", () => {
         name: "slon + slon_node = slon",
       }),
       expect.objectContaining({
-        type: "pg_trigger",
-        name: "RI_ConstraintTrigger_a_16472 on slon",
-      }),
-      expect.objectContaining({
         type: "pg_class",
         name: "slon",
       }),
       expect.objectContaining({
         type: "pg_constraint",
-        name: "slon_related_to_fkey",
+        name: "slon_related_to_fkey", // cspell:disable-line
       }),
       expect.objectContaining({
         type: "pg_attribute",
@@ -902,10 +889,6 @@ describe("pg-diff", () => {
       expect.objectContaining({
         type: "pg_proc",
         name: "slon_append(slon_node): slon",
-      }),
-      expect.objectContaining({
-        type: "pg_trigger",
-        name: "RI_ConstraintTrigger_c_16473 on slon",
       }),
     ]);
   });

@@ -261,13 +261,13 @@ create view "pg_diff_inspect" as (
         'definition', pg_get_triggerDef(pg_trigger.oid),
         'type', tgType,
         'enabled', tgEnabled,
-        'isInternal', tgIsInternal,
         'isDeferral', tgDeferrable,
         'isDeferred', tgInitDeferred
       ) as "extras"
     from pg_trigger
       inner join pg_class
         on tgRelId = pg_class.oid
+    where not tgIsInternal
   union
   select
       null as "kind",
