@@ -6,7 +6,7 @@ const dirname = fileURLToPath(new URL(".", import.meta.url));
 
 export const definition = await readFile(path.join(dirname, "pg_diff.sql"), "utf8");
 
-export async function snapshot(sql) {
+export async function inspect(sql) {
   return await sql`select * from "pg_diff_inspect" where "namespace" not in ('information_schema', 'pg_catalog', 'pg_toast')`;
 }
 
