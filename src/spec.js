@@ -1,5 +1,6 @@
 import { PGlite } from "@electric-sql/pglite";
 import { afterAll, beforeAll, describe, expect, test } from "@jest/globals";
+import { definition as slon } from "pg-slon";
 import { definition, diff, snapshot } from "./index.js";
 
 describe("pg-diff", () => {
@@ -198,7 +199,7 @@ describe("pg-diff", () => {
       {
         kind: "+",
         type: "pg_proc",
-        name: "test",
+        name: "test(): void",
         namespace: "public",
         extras: {
           "+": {
@@ -221,7 +222,7 @@ describe("pg-diff", () => {
             numberOfArgs: 0,
             argumentModes: null,
             argumentNames: null,
-            argumentTypes: null,
+            argumentTypes: [],
             argumentDefaults: null,
             isSecurityDefiner: false,
             numberOfArgsWithDefaults: 0,
@@ -370,7 +371,7 @@ describe("pg-diff", () => {
       {
         kind: "+",
         type: "pg_operator",
-        name: "<<<",
+        name: "integer <<< integer = boolean",
         namespace: "public",
         extras: {
           "+": {
@@ -638,6 +639,274 @@ describe("pg-diff", () => {
           delta: null,
         },
       },
+    ]);
+  });
+
+  test("slon", async () => {
+    const before = await snapshot(sql);
+
+    await pg.exec(slon);
+
+    const after = await snapshot(sql);
+
+    const result = await diff(sql, { before, after });
+
+    expect(new Set(result.map(({ kind }) => kind))).toEqual(new Set(["+"]));
+
+    expect(result).toEqual([
+      expect.objectContaining({
+        type: "pg_operator",
+        name: "- @ text = slon_symbol",
+      }),
+      expect.objectContaining({
+        type: "pg_attribute",
+        name: "slon.related_to",
+      }),
+      expect.objectContaining({
+        type: "pg_proc",
+        name: "slon_symbol_constructor(text): slon_symbol",
+      }),
+      expect.objectContaining({
+        type: "pg_proc",
+        name: "slon_object_constructor(slon_symbol, slon): slon_object",
+      }),
+      expect.objectContaining({
+        type: "pg_type",
+        name: "slon_object",
+      }),
+      expect.objectContaining({
+        type: "pg_proc",
+        name: "slon_object_constructor(text, slon): slon_object",
+      }),
+      expect.objectContaining({
+        type: "pg_proc",
+        name: "slon_object_constructor(slon, text): slon_object",
+      }),
+      expect.objectContaining({
+        type: "pg_operator",
+        name: "slon_node = slon_node = boolean",
+      }),
+      expect.objectContaining({
+        type: "pg_proc",
+        name: "slon_node_constructor(slon_object, slon_object): slon_node",
+      }),
+      expect.objectContaining({
+        type: "pg_operator",
+        name: "slon_symbol | slon_symbol = slon_object",
+      }),
+      expect.objectContaining({
+        type: "pg_operator",
+        name: "slon_symbol | slon = slon_object",
+      }),
+      expect.objectContaining({
+        type: "pg_proc",
+        name: "slon_node_equality(slon_node, slon_node): boolean",
+      }),
+      expect.objectContaining({
+        type: "pg_type",
+        name: "slon_symbol",
+      }),
+      expect.objectContaining({
+        type: "pg_cast",
+        name: "slon_object -> slon_node",
+        namespace: "",
+      }),
+      expect.objectContaining({
+        type: "pg_operator",
+        name: "slon + slon_node[] = slon",
+      }),
+      expect.objectContaining({
+        type: "pg_operator",
+        name: "text | slon_object = slon_object",
+      }),
+      expect.objectContaining({
+        type: "pg_proc",
+        name: "slon_object_constructor(slon_symbol, slon_object): slon_object",
+      }),
+      expect.objectContaining({
+        type: "pg_operator",
+        name: "text | text = slon_object",
+      }),
+      expect.objectContaining({
+        type: "pg_attribute",
+        name: "slon_index_seq.is_called",
+      }),
+      expect.objectContaining({
+        type: "pg_proc",
+        name: "slon_object_constructor(slon_object, text): slon_object",
+      }),
+      expect.objectContaining({
+        type: "pg_operator",
+        name: "slon_symbol | slon_object = slon_object",
+      }),
+      expect.objectContaining({
+        type: "pg_constraint",
+        name: "slon_pkey",
+      }),
+      expect.objectContaining({
+        type: "pg_operator",
+        name: "- - slon = slon",
+      }),
+      expect.objectContaining({
+        type: "pg_proc",
+        name: "slon_append(slon, slon_node): slon",
+      }),
+      expect.objectContaining({
+        type: "pg_proc",
+        name: "slon_node_constructor(slon_object): slon_node",
+      }),
+      expect.objectContaining({
+        type: "pg_trigger",
+        name: "RI_ConstraintTrigger_c_16474 on slon",
+      }),
+      expect.objectContaining({
+        type: "pg_proc",
+        name: "slon_object_constructor(text, slon_object): slon_object",
+      }),
+      expect.objectContaining({
+        type: "pg_operator",
+        name: "text | slon = slon_object",
+      }),
+      expect.objectContaining({
+        type: "pg_proc",
+        name: "slon_object_constructor(slon_object, slon_symbol): slon_object",
+      }),
+      expect.objectContaining({
+        type: "pg_trigger",
+        name: "RI_ConstraintTrigger_a_16471 on slon",
+      }),
+      expect.objectContaining({
+        type: "pg_operator",
+        name: "slon_symbol = slon_symbol = boolean",
+      }),
+      expect.objectContaining({
+        type: "pg_proc",
+        name: "slon_append(slon, slon_node[]): slon set",
+      }),
+      expect.objectContaining({
+        type: "pg_attribute",
+        name: "slon.id",
+      }),
+      expect.objectContaining({
+        type: "pg_operator",
+        name: "slon_object & slon_object = slon_node",
+      }),
+      expect.objectContaining({
+        type: "pg_attribute",
+        name: "slon.node",
+      }),
+      expect.objectContaining({
+        type: "pg_operator",
+        name: "slon + slon_node = slon",
+      }),
+      expect.objectContaining({
+        type: "pg_trigger",
+        name: "RI_ConstraintTrigger_a_16472 on slon",
+      }),
+      expect.objectContaining({
+        type: "pg_class",
+        name: "slon",
+      }),
+      expect.objectContaining({
+        type: "pg_constraint",
+        name: "slon_related_to_fkey",
+      }),
+      expect.objectContaining({
+        type: "pg_attribute",
+        name: "slon_index_seq.last_value",
+      }),
+      expect.objectContaining({
+        type: "pg_proc",
+        name: "slon_object_constructor(slon_symbol, slon_symbol): slon_object",
+      }),
+      expect.objectContaining({
+        type: "pg_operator",
+        name: "slon | text = slon_object",
+      }),
+      expect.objectContaining({
+        type: "pg_proc",
+        name: "slon_symbol_equality(slon_symbol, slon_symbol): boolean",
+      }),
+      expect.objectContaining({
+        type: "pg_operator",
+        name: "slon_object | slon_symbol = slon_object",
+      }),
+      expect.objectContaining({
+        type: "pg_proc",
+        name: "slon_query(slon_node): slon set",
+      }),
+      expect.objectContaining({
+        type: "pg_type",
+        name: "slon_node",
+      }),
+      expect.objectContaining({
+        type: "pg_proc",
+        name: "slon_delete(slon): slon",
+      }),
+      expect.objectContaining({
+        type: "pg_operator",
+        name: "slon | slon_symbol = slon_object",
+      }),
+      expect.objectContaining({
+        type: "pg_operator",
+        name: "- ? slon_node = slon",
+      }),
+      expect.objectContaining({
+        type: "pg_proc",
+        name: "slon_object_constructor(text, text): slon_object",
+      }),
+      expect.objectContaining({
+        type: "pg_proc",
+        name: "slon_object_constructor(slon, slon_symbol): slon_object",
+      }),
+      expect.objectContaining({
+        type: "pg_operator",
+        name: "- & slon_object = slon_node",
+      }),
+      expect.objectContaining({
+        type: "pg_class",
+        name: "slon_index_seq",
+      }),
+      expect.objectContaining({
+        type: "pg_attribute",
+        name: "slon.index",
+      }),
+      expect.objectContaining({
+        type: "pg_proc",
+        name: "slon_query(slon, slon_node): slon set",
+      }),
+      expect.objectContaining({
+        type: "pg_operator",
+        name: "slon_object = slon_object = boolean",
+      }),
+      expect.objectContaining({
+        type: "pg_attribute",
+        name: "slon_index_seq.log_cnt",
+      }),
+      expect.objectContaining({
+        type: "pg_operator",
+        name: "slon_object | text = slon_object",
+      }),
+      expect.objectContaining({
+        type: "pg_operator",
+        name: "- + slon_node = slon",
+      }),
+      expect.objectContaining({
+        type: "pg_operator",
+        name: "slon ? slon_node = slon",
+      }),
+      expect.objectContaining({
+        type: "pg_proc",
+        name: "slon_object_equality(slon_object, slon_object): boolean",
+      }),
+      expect.objectContaining({
+        type: "pg_proc",
+        name: "slon_append(slon_node): slon",
+      }),
+      expect.objectContaining({
+        type: "pg_trigger",
+        name: "RI_ConstraintTrigger_c_16473 on slon",
+      }),
     ]);
   });
 

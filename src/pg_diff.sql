@@ -63,7 +63,8 @@ create view "pg_diff_inspect" as (
   select
       null as "kind",
       'pg_proc' as "type",
-      proName as "name",
+      format('%s(%s): %s', proName, array_to_string(proArgTypes::regType[]::text[], ', '), proRetType::regType::text)
+        || case when proRetSet then ' set' else '' end as "name",
       proNamespace::regNamespace::text as "namespace",
       jsonb_build_object(
         'owner', proOwner::regRole,
@@ -80,7 +81,7 @@ create view "pg_diff_inspect" as (
         'numberOfArgs', proNArgs,
         'numberOfArgsWithDefaults', proNArgDefaults,
         'returnType', proRetType::regType,
-        'argumentTypes', proAllArgTypes::regType[],
+        'argumentTypes', proArgTypes::regType[],
         'argumentModes', proArgModes,
         'argumentNames', proArgNames,
         'argumentDefaults', proArgDefaults,
@@ -167,7 +168,7 @@ create view "pg_diff_inspect" as (
   select
       null as "kind",
       'pg_operator' as "type",
-      target.oprName as "name",
+      target.oprLeft::regType::text || ' ' || target.oprName || ' ' || target.oprRight::regType::text || ' = ' || target.oprResult::regType::text as "name",
       target.oprNamespace::regNamespace::text as "namespace",
       jsonb_build_object(
         'owner', target.oprOwner::regRole,
