@@ -1,11 +1,15 @@
 import { PGlite } from "@electric-sql/pglite";
 import { afterAll, beforeAll, describe, expect, test } from "@jest/globals";
 import { definition as slon } from "pg-slon";
+import postgres from "postgres";
 import { definition, diff, inspect } from "./index.js";
 
 describe("pg-diff", () => {
   const pg = new PGlite();
-  const sql = async (...args) => (await pg.sql(...args)).rows;
+  const sql = async (
+    /** @type {TemplateStringsArray} */ template,
+    /** @type {any[]} */ ...params
+  ) => (await pg.sql(template, ...params)).rows;
   beforeAll(async () => pg.exec(definition));
   afterAll(async () => pg.close());
 
@@ -884,16 +888,16 @@ describe("pg-diff", () => {
       {
         kind: null,
         type: "pg_proc",
-        name: "jsonb_delta_fn(jsonb, jsonb): jsonb",
+        name: "jsonb_delta(jsonb): jsonb",
         namespace: "public",
-        extras: expect.objectContaining({ kind: "f" }),
+        extras: expect.objectContaining({ kind: "a" }),
       },
       {
         kind: null,
         type: "pg_proc",
-        name: "jsonb_delta(jsonb): jsonb",
+        name: "jsonb_delta_fn(jsonb, jsonb): jsonb",
         namespace: "public",
-        extras: expect.objectContaining({ kind: "a" }),
+        extras: expect.objectContaining({ kind: "f" }),
       },
     ]);
   });
@@ -904,5 +908,95 @@ describe("pg-diff", () => {
     const after = await inspect(sql);
 
     expect(await diff(sql, { left: before, right: after }));
+  });
+});
+
+describe("using postgres.js", () => {
+  const sql = postgres({ user: "postgres" });
+  beforeAll(async () => sql.file("./src/pg_diff.sql").simple());
+  afterAll(async () => sql.end());
+
+  test("view", async () => {
+    await sql`drop view if exists "test"`;
+
+    const before = await inspect(sql);
+
+    await sql`create view "test" as select 1 as "column"`;
+
+    const after = await inspect(sql);
+
+    expect(await diff(sql, { left: before, right: after })).toEqual([
+      {
+        kind: "+",
+        type: "pg_class",
+        name: "test",
+        namespace: "public",
+        extras: {
+          "+": {
+            acl: null,
+            kind: "v",
+            type: "test",
+            owner: "postgres",
+            ofType: "-",
+            options: null,
+            isShared: false,
+            tableSpace: null,
+            isPartition: false,
+            persistence: "p",
+            rowSecurity: false,
+            accessMethod: null,
+            replicaIdentity: "n",
+            forceRowSecurity: false,
+          },
+          delta: null,
+        },
+      },
+      {
+        kind: "+",
+        type: "pg_attribute",
+        name: "test.column",
+        namespace: "public",
+        extras: {
+          "+": {
+            acl: null,
+            type: "integer",
+            length: 4,
+            default: null,
+            isLocal: true,
+            notNull: false,
+            options: null,
+            identity: "",
+            relation: "test",
+            ancestors: 0,
+            collation: "-",
+            generated: "",
+            dimensions: 0,
+            fdwOptions: null,
+            hasDefault: false,
+            hasMissing: false,
+            statistics: -1,
+            compression: "",
+            missingValue: null,
+          },
+          delta: null,
+        },
+      },
+      {
+        kind: "+",
+        type: "pg_rewrite",
+        name: "_RETURN on test",
+        namespace: "public",
+        extras: {
+          "+": {
+            type: "1",
+            enabled: "O",
+            isInstead: true,
+            definition:
+              'CREATE RULE "_RETURN" AS\n    ON SELECT TO public.test DO INSTEAD  SELECT 1 AS "column";',
+          },
+          delta: null,
+        },
+      },
+    ]);
   });
 });

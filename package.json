@@ -14,7 +14,8 @@
     "@electric-sql/pglite": "0.2.10",
     "@jest/globals": "29.7.0",
     "jest": "29.7.0",
-    "pg-slon": "0.1.0"
+    "pg-slon": "0.1.0",
+    "postgres": "3.4.4"
   },
   "wallaby": {
     "runMode": "onsave",

@@ -1,4 +1,4 @@
-create view "pg_diff_inspect" as (
+create or replace view "pg_diff_inspect" as (
   select
       null as "kind",
       'pg_class' as "type",
@@ -307,28 +307,29 @@ create view "pg_diff_inspect" as (
       left join pg_class on typRelId = pg_class.oid
     where typType != 'b'
       and relKind is distinct from 'r'
+      and relKind is distinct from 'v'
 );
 
-create function "jsonb_delta_fn" (jsonb, jsonb)
+create or replace function "jsonb_delta_fn" ("~state" jsonb, "~value" jsonb)
 returns jsonb
 language sql as $$
   select case
-    when $1 is null then $2
+    when "~state" is null then "~value"
     else (
       select jsonb_object_agg("key", "value")
         from (
           select "key", jsonb_agg("value") as "value"
             from (
               (
-                select * from jsonb_each($1)
+                select * from jsonb_each("~state")
                 except
-                select * from jsonb_each($2)
+                select * from jsonb_each("~value")
               )
               union
               (
-                select * from jsonb_each($2)
+                select * from jsonb_each("~value")
                 except
-                select * from jsonb_each($1)
+                select * from jsonb_each("~state")
               )
             )
             group by "key"
@@ -337,12 +338,12 @@ language sql as $$
   end
 $$;
 
-create aggregate "jsonb_delta" (jsonb) (
+create or replace aggregate "jsonb_delta" (jsonb) (
   sFunc = "jsonb_delta_fn"(jsonb, jsonb),
   sType = jsonb
 );
 
-create function "pg_diff" (jsonb, jsonb)
+create or replace function "pg_diff" ("~left" jsonb, "~right" jsonb)
 returns setof "pg_diff_inspect"
 language sql as $$
   select
@@ -361,15 +362,15 @@ language sql as $$
       )::jsonb as "extras"
     from (
       select '-' as "kind", "type", "name", "namespace", "extras" from (
-        select * from jsonb_populate_recordSet(null::"pg_diff_inspect", $1)
+        select * from jsonb_populate_recordSet(null::"pg_diff_inspect", "~left")
         except
-        select * from jsonb_populate_recordSet(null::"pg_diff_inspect", $2)
+        select * from jsonb_populate_recordSet(null::"pg_diff_inspect", "~right")
       )
       union
       select '+' as "kind", "type", "name", "namespace", "extras" from (
-        select * from jsonb_populate_recordSet(null::"pg_diff_inspect", $2)
+        select * from jsonb_populate_recordSet(null::"pg_diff_inspect", "~right")
         except
-        select * from jsonb_populate_recordSet(null::"pg_diff_inspect", $1)
+        select * from jsonb_populate_recordSet(null::"pg_diff_inspect", "~left")
       )
     )
     group by "type", "name", "namespace"
