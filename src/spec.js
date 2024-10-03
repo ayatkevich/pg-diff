@@ -514,6 +514,133 @@ describe("pg-diff", () => {
     ]);
   });
 
+  test("type", async () => {
+    const before = await snapshot(sql);
+
+    await sql`create type "test_enum" as enum ('a', 'b')`;
+    await sql`create type "test_composite" as (a integer, b text)`;
+    await sql`create domain "test_domain" as text`;
+
+    const after = await snapshot(sql);
+
+    expect(await diff(sql, { before, after })).toEqual([
+      {
+        kind: "+",
+        type: "pg_type",
+        name: "test_domain",
+        namespace: "public",
+        extras: {
+          "+": {
+            acl: null,
+            type: "d",
+            align: "i",
+            array: "test_domain[]",
+            owner: "postgres",
+            length: -1,
+            default: null,
+            notNull: false,
+            storage: "x",
+            typeMod: -1,
+            baseType: "text",
+            category: "S",
+            relation: "-",
+            collation: '"default"',
+            delimiter: ",",
+            isByValue: false,
+            isDefined: true,
+            subscript: "-",
+            isPreferred: false,
+            sendFunction: "textsend", // cspell:disable-line
+            inputFunction: "domain_in",
+            outputFunction: "textout", // cspell:disable-line
+            analyzeFunction: "-",
+            receiveFunction: "domain_recv",
+            numberOfDimensions: 0,
+            modifierInputFunction: "-",
+            modifierOutputFunction: "-",
+          },
+          delta: null,
+        },
+      },
+      {
+        kind: "+",
+        type: "pg_type",
+        name: "test_enum",
+        namespace: "public",
+        extras: {
+          "+": {
+            acl: null,
+            type: "e",
+            align: "i",
+            array: "test_enum[]",
+            owner: "postgres",
+            length: 4,
+            default: null,
+            notNull: false,
+            storage: "p",
+            typeMod: -1,
+            baseType: "-",
+            category: "E",
+            relation: "-",
+            collation: "-",
+            delimiter: ",",
+            isByValue: true,
+            isDefined: true,
+            subscript: "-",
+            isPreferred: false,
+            sendFunction: "enum_send",
+            inputFunction: "enum_in",
+            outputFunction: "enum_out",
+            analyzeFunction: "-",
+            receiveFunction: "enum_recv",
+            numberOfDimensions: 0,
+            modifierInputFunction: "-",
+            modifierOutputFunction: "-",
+          },
+          delta: null,
+        },
+      },
+      {
+        kind: "+",
+        type: "pg_type",
+        name: "test_composite",
+        namespace: "public",
+        extras: {
+          "+": {
+            acl: null,
+            type: "c",
+            align: "d",
+            array: "test_composite[]",
+            owner: "postgres",
+            length: -1,
+            default: null,
+            notNull: false,
+            storage: "x",
+            typeMod: -1,
+            baseType: "-",
+            category: "C",
+            relation: "test_composite",
+            collation: "-",
+            delimiter: ",",
+            isByValue: false,
+            isDefined: true,
+            subscript: "-",
+            isPreferred: false,
+            sendFunction: "record_send",
+            inputFunction: "record_in",
+            outputFunction: "record_out",
+            analyzeFunction: "-",
+            receiveFunction: "record_recv",
+            numberOfDimensions: 0,
+            modifierInputFunction: "-",
+            modifierOutputFunction: "-",
+          },
+          delta: null,
+        },
+      },
+    ]);
+  });
+
   test("template", async () => {
     const before = await snapshot(sql);
 

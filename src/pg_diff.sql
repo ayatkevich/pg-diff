@@ -23,7 +23,7 @@ create view "pg_diff_inspect" as (
     from pg_class
       left join pg_am on relAM = pg_am.oid
       left join pg_tablespace on relTableSpace = pg_tablespace.oid
-    where relKind != 'i'
+    where relKind not in ('i', 'c')
   union
   select
       null as "kind",
@@ -58,7 +58,7 @@ create view "pg_diff_inspect" as (
           and pg_attrDef.adNum = pg_attribute.attNum
     where not attIsDropped
       and attNum > 0
-      and relKind != 'i'
+      and relKind not in ('i', 'c')
   union
   select
       null as "kind",
@@ -267,6 +267,45 @@ create view "pg_diff_inspect" as (
     from pg_trigger
       inner join pg_class
         on tgRelId = pg_class.oid
+  union
+  select
+      null as "kind",
+      'pg_type' as "type",
+      typName as "name",
+      typNamespace::regNamespace::text as "namespace",
+      jsonb_build_object(
+        'owner', typOwner::regRole,
+        'length', typLen,
+        'isByValue', typByVal,
+        'type', typType,
+        'category', typCategory,
+        'isPreferred', typIsPreferred,
+        'isDefined', typIsDefined,
+        'delimiter', typDelim, -- cspell:disable-line
+        'relation', typRelId::regClass,
+        'subscript', typSubscript,
+        'array', typArray::regType,
+        'inputFunction', typInput::regProc,
+        'outputFunction', typOutput::regProc,
+        'receiveFunction', typReceive::regProc,
+        'sendFunction', typSend::regProc,
+        'modifierInputFunction', typModIn::regProc,
+        'modifierOutputFunction', typModOut::regProc,
+        'analyzeFunction', typAnalyze::regProc,
+        'align', typAlign,
+        'storage', typStorage,
+        'notNull', typNotNull,
+        'baseType', typBaseType::regType,
+        'typeMod', typTypMod,
+        'numberOfDimensions', typNDims,
+        'collation', typCollation::regCollation,
+        'default', typDefault,
+        'acl', typAcl
+      ) as "extras"
+    from pg_type
+      left join pg_class on typRelId = pg_class.oid
+    where typType != 'b'
+      and relKind is distinct from 'r'
 );
 
 create function "jsonb_delta_fn" (jsonb, jsonb)
