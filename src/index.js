@@ -10,6 +10,6 @@ export async function inspect(sql) {
   return await sql`select * from "pg_diff_inspect" where "namespace" not in ('information_schema', 'pg_catalog', 'pg_toast')`;
 }
 
-export async function diff(sql, { before, after }) {
-  return await sql`select * from "pg_diff"(${before}, ${after})`;
+export async function diff(sql, { left, right }) {
+  return await sql`select * from "pg_diff"(${left}, ${right})`;
 }

@@ -16,7 +16,7 @@ describe("pg-diff", () => {
 
     const after = await inspect(sql);
 
-    expect(await diff(sql, { before, after })).toEqual([
+    expect(await diff(sql, { left: before, right: after })).toEqual([
       {
         kind: "+",
         type: "pg_class",
@@ -52,7 +52,7 @@ describe("pg-diff", () => {
 
     const after = await inspect(sql);
 
-    expect(await diff(sql, { before, after })).toEqual([
+    expect(await diff(sql, { left: before, right: after })).toEqual([
       {
         kind: "-",
         type: "pg_class",
@@ -90,7 +90,7 @@ describe("pg-diff", () => {
 
     const after = await inspect(sql);
 
-    expect(await diff(sql, { before, after })).toEqual([
+    expect(await diff(sql, { left: before, right: after })).toEqual([
       {
         kind: "+",
         type: "pg_attribute",
@@ -131,7 +131,7 @@ describe("pg-diff", () => {
 
     const after = await inspect(sql);
 
-    expect(await diff(sql, { before, after })).toEqual([
+    expect(await diff(sql, { left: before, right: after })).toEqual([
       {
         kind: "+-",
         type: "pg_attribute",
@@ -195,7 +195,7 @@ describe("pg-diff", () => {
 
     const after = await inspect(sql);
 
-    expect(await diff(sql, { before, after })).toEqual([
+    expect(await diff(sql, { left: before, right: after })).toEqual([
       {
         kind: "+",
         type: "pg_proc",
@@ -240,7 +240,7 @@ describe("pg-diff", () => {
 
     const after = await inspect(sql);
 
-    expect(await diff(sql, { before, after })).toEqual([
+    expect(await diff(sql, { left: before, right: after })).toEqual([
       {
         kind: "+",
         type: "pg_authid",
@@ -271,7 +271,7 @@ describe("pg-diff", () => {
 
     const after = await inspect(sql);
 
-    expect(await diff(sql, { before, after })).toEqual([
+    expect(await diff(sql, { left: before, right: after })).toEqual([
       {
         kind: "+",
         type: "pg_cast",
@@ -292,7 +292,7 @@ describe("pg-diff", () => {
 
     const after = await inspect(sql);
 
-    expect(await diff(sql, { before, after })).toEqual([
+    expect(await diff(sql, { left: before, right: after })).toEqual([
       {
         kind: "+",
         type: "pg_constraint",
@@ -342,7 +342,7 @@ describe("pg-diff", () => {
 
     const after = await inspect(sql);
 
-    expect(await diff(sql, { before, after })).toEqual([
+    expect(await diff(sql, { left: before, right: after })).toEqual([
       {
         kind: "+",
         type: "pg_description",
@@ -367,7 +367,7 @@ describe("pg-diff", () => {
 
     const after = await inspect(sql);
 
-    expect(await diff(sql, { before, after })).toEqual([
+    expect(await diff(sql, { left: before, right: after })).toEqual([
       {
         kind: "+",
         type: "pg_operator",
@@ -401,7 +401,7 @@ describe("pg-diff", () => {
 
     const after = await inspect(sql);
 
-    expect(await diff(sql, { before, after })).toEqual([
+    expect(await diff(sql, { left: before, right: after })).toEqual([
       {
         kind: "+",
         type: "pg_policy",
@@ -429,7 +429,7 @@ describe("pg-diff", () => {
 
     const after = await inspect(sql);
 
-    expect(await diff(sql, { before, after })).toEqual([
+    expect(await diff(sql, { left: before, right: after })).toEqual([
       {
         kind: "+",
         type: "pg_publication",
@@ -465,7 +465,7 @@ describe("pg-diff", () => {
 
     const after = await inspect(sql);
 
-    expect(await diff(sql, { before, after })).toEqual([
+    expect(await diff(sql, { left: before, right: after })).toEqual([
       {
         kind: "+",
         type: "pg_rewrite",
@@ -492,7 +492,7 @@ describe("pg-diff", () => {
 
     const after = await inspect(sql);
 
-    expect(await diff(sql, { before, after })).toEqual([
+    expect(await diff(sql, { left: before, right: after })).toEqual([
       {
         kind: "+",
         type: "pg_trigger",
@@ -523,7 +523,7 @@ describe("pg-diff", () => {
 
     const after = await inspect(sql);
 
-    expect(await diff(sql, { before, after })).toEqual([
+    expect(await diff(sql, { left: before, right: after })).toEqual([
       {
         kind: "+",
         type: "pg_type",
@@ -648,7 +648,7 @@ describe("pg-diff", () => {
 
     const after = await inspect(sql);
 
-    const result = await diff(sql, { before, after });
+    const result = await diff(sql, { left: before, right: after });
 
     expect(new Set(result.map(({ kind }) => kind))).toEqual(new Set(["+"]));
 
@@ -903,6 +903,6 @@ describe("pg-diff", () => {
 
     const after = await inspect(sql);
 
-    expect(await diff(sql, { before, after }));
+    expect(await diff(sql, { left: before, right: after }));
   });
 });

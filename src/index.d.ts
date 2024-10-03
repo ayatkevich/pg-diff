@@ -21,5 +21,5 @@ export declare function inspect(sql: SqlFunction): Promise<InspectionRecord[]>;
 
 export declare function diff(
   sql: SqlFunction,
-  input: { before: InspectionRecord[]; after: InspectionRecord[] }
+  input: { left: InspectionRecord[]; right: InspectionRecord[] }
 ): Promise<DiffRecord[]>;
