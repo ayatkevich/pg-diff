@@ -1018,6 +1018,34 @@ describe("pg-diff", () => {
     ]);
   });
 
+  test("event trigger", async () => {
+    await sql`create function "test_event_trigger_fn"() returns event_trigger language plpgsql as $$ begin raise notice 'test'; end; $$`;
+    const before = await inspect(sql);
+
+    await sql`create event trigger "test_event_trigger" on ddl_command_end execute procedure "test_event_trigger_fn"()`;
+
+    const after = await inspect(sql);
+
+    expect(await diff(sql, { left: before, right: after })).toEqual([
+      {
+        kind: "+",
+        type: "pg_event_trigger",
+        name: "test_event_trigger",
+        namespace: "",
+        extras: {
+          "+": {
+            tags: null,
+            event: "ddl_command_end",
+            owner: "postgres",
+            enabled: "O",
+            function: "test_event_trigger_fn",
+          },
+          delta: null,
+        },
+      },
+    ]);
+  });
+
   test("template", async () => {
     const before = await inspect(sql);
 

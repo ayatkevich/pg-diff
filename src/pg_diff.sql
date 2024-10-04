@@ -370,6 +370,20 @@ create or replace view "pg_diff_inspect" as (
         'acl', nspAcl
       ) as "extras"
     from pg_namespace
+  union
+  select
+      null as "kind",
+      'pg_event_trigger' as "type",
+      evtName as "name",
+      '' as "namespace",
+      jsonb_build_object(
+        'event', evtEvent,
+        'owner', evtOwner::regRole,
+        'function', evtFoId::regProc,
+        'enabled', evtEnabled,
+        'tags', evtTags
+      ) as "extras"
+    from pg_event_trigger
 );
 
 create or replace function "jsonb_delta_fn" ("~state" jsonb, "~value" jsonb)
