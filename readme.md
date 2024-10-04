@@ -263,6 +263,176 @@ npm test
 
 The test suite covers various scenarios to ensure the library works as expected.
 
+## Todo
+
+Sure! Here's the list of missing PostgreSQL objects formatted as a Markdown TODO list:
+
+# TODO List of Missing PostgreSQL Objects
+
+- [ ] **Indexes**
+
+  - **System Catalogs**: `pg_index`, `pg_class` (with `relkind = 'i'`)
+  - **Description**: Indexes are crucial for database performance but are currently excluded. They are identified in `pg_class` with `relkind = 'i'`.
+
+- [ ] **Collations**
+
+  - **System Catalog**: `pg_collation`
+  - **Description**: Collations define how string data is sorted and compared.
+
+- [ ] **Conversions**
+
+  - **System Catalog**: `pg_conversion`
+  - **Description**: Used for character set conversions between different encodings.
+
+- [ ] **Foreign Data Wrappers, Servers, and User Mappings**
+
+  - **System Catalogs**: `pg_foreign_data_wrapper`, `pg_foreign_server`, `pg_user_mapping`
+  - **Description**: Access external data sources through the Foreign Data Wrapper (FDW) mechanism.
+
+- [ ] **Text Search Objects**
+
+  - **System Catalogs**: `pg_ts_config`, `pg_ts_dict`, `pg_ts_parser`, `pg_ts_template`
+  - **Description**: Objects used for full-text search configurations, dictionaries, parsers, and templates.
+
+- [ ] **Operator Classes and Operator Families**
+
+  - **System Catalogs**: `pg_opclass`, `pg_opfamily`
+  - **Description**: Define how data types behave with indexes; essential for custom indexing strategies.
+
+- [ ] **Access Methods**
+
+  - **System Catalog**: `pg_am`
+  - **Description**: Define how the database accesses data. While joined in `pg_class`, standalone access methods are not included.
+
+- [ ] **Aggregates**
+
+  - **System Catalog**: `pg_aggregate`
+  - **Description**: Aggregates have additional metadata beyond `pg_proc`, stored in `pg_aggregate`.
+
+- [ ] **Tablespaces**
+
+  - **System Catalog**: `pg_tablespace`
+  - **Description**: Define locations on the file system where data files reside; important for storage management.
+
+- [ ] **Publication Subscriptions**
+
+  - **System Catalog**: `pg_subscription`
+  - **Description**: Used in logical replication to subscribe to publications from other databases.
+
+- [ ] **Extended Statistics**
+
+  - **System Catalog**: `pg_statistic_ext`
+  - **Description**: Hold extended statistics like multivariate statistics for better query planning.
+
+- [ ] **Range Types**
+
+  - **System Catalog**: `pg_range`
+  - **Description**: Represent data types that are ranges over some element type.
+
+- [ ] **Materialized Views**
+
+  - **System Catalog**: `pg_class` (with `relkind = 'm'`)
+  - **Description**: Views that store data physically; identified with `relkind = 'm'`.
+
+- [ ] **Foreign Tables**
+
+  - **System Catalog**: `pg_class` (with `relkind = 'f'`)
+  - **Description**: Tables that use a foreign data wrapper to access external data.
+
+- [ ] **Statistics Objects**
+
+  - **System Catalog**: `pg_statistic`
+  - **Description**: Hold statistics about the contents of the database for the query planner.
+
+- [ ] **Role Memberships**
+
+  - **System Catalog**: `pg_auth_members`
+  - **Description**: Define role memberships, showing which roles are members of other roles.
+
+- [ ] **Default ACLs**
+
+  - **System Catalog**: `pg_default_acl`
+  - **Description**: Default access control lists that apply to objects created in the future.
+
+- [ ] **Large Object Metadata**
+
+  - **System Catalog**: `pg_largeobject_metadata`
+  - **Description**: Stores metadata about large objects (BLOBs).
+
+- [ ] **Replication Slots**
+
+  - **System Catalog**: `pg_replication_slots`
+  - **Description**: Used in replication to keep track of the state between publisher and subscriber.
+
+- [ ] **Event Trigger Functions (Details)**
+
+  - **System Catalog**: `pg_event_trigger` (function details)
+  - **Description**: While `pg_event_trigger` is included, details about associated functions might be missing.
+
+- [ ] **Policies on Other Objects**
+
+  - **System Catalog**: Policies on sequences, functions, etc.
+  - **Description**: Policies defined on objects other than tables.
+
+- [ ] **Rules on Other Objects**
+
+  - **System Catalog**: Rules on views, etc.
+  - **Description**: Rules can be defined on views and other objects.
+
+- [ ] **Foreign Keys and Relationship Details**
+
+  - **System Catalog**: `pg_constraint` (additional details)
+  - **Description**: Detailed information about foreign keys may be incomplete.
+
+- [ ] **Operator Exclusion Constraints**
+
+  - **System Catalog**: `pg_constraint` (with `contype = 'x'`)
+  - **Description**: Exclusion constraints using operators to enforce complex rules.
+
+- [ ] **Domain Constraints**
+
+  - **System Catalog**: `pg_constraint` (with `contype = 'c'` and associated with domains)
+  - **Description**: Constraints defined on domains.
+
+- [ ] **Enums (Enumeration Types)**
+
+  - **System Catalog**: `pg_enum`
+  - **Description**: Enumeration values for enum types; while types may be included, enum values might not be.
+
+- [ ] **Foreign Partitions**
+
+  - **System Catalog**: `pg_inherits`, `pg_class` (with `relkind = 'p'` and `relispartition = true`)
+  - **Description**: Partitions that are foreign tables.
+
+- [ ] **User-Defined Languages**
+
+  - **System Catalog**: `pg_language`
+  - **Description**: Languages available for writing functions and procedures.
+
+- [ ] **Procedures**
+
+  - **System Catalog**: `pg_proc` (with `prokind = 'p'`)
+  - **Description**: Stored procedures differ from functions and may need separate handling.
+
+- [ ] **Publications Without Tables or Schemas**
+
+  - **System Catalog**: `pg_publication`
+  - **Description**: Publications that don't have associated tables or schemas.
+
+- [ ] **Composite Types Details**
+
+  - **System Catalog**: `pg_type` (with `typtype = 'c'`)
+  - **Description**: While types are included, detailed attribute information may be missing.
+
+- [ ] **Partitioned Tables**
+
+  - **System Catalog**: `pg_class` (with `relkind = 'p'`)
+  - **Description**: Tables that serve as partitioned parents.
+
+- [ ] **Statistics Extended Options**
+  - **System Catalog**: `pg_statistic_ext_data`
+  - **Description**: Data for extended statistics objects.
+
 ## Contributing
 
 Contributions are welcome! Please submit a pull request or open an issue to discuss any changes or enhancements.
