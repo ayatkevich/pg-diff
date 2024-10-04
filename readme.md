@@ -269,16 +269,6 @@ Sure! Here's the list of missing PostgreSQL objects formatted as a Markdown TODO
 
 # TODO List of Missing PostgreSQL Objects
 
-- [ ] **Indexes**
-
-  - **System Catalogs**: `pg_index`, `pg_class` (with `relkind = 'i'`)
-  - **Description**: Indexes are crucial for database performance but are currently excluded. They are identified in `pg_class` with `relkind = 'i'`.
-
-- [ ] **Collations**
-
-  - **System Catalog**: `pg_collation`
-  - **Description**: Collations define how string data is sorted and compared.
-
 - [ ] **Conversions**
 
   - **System Catalog**: `pg_conversion`
