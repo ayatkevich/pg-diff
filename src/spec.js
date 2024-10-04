@@ -1000,6 +1000,24 @@ describe("pg-diff", () => {
     ]);
   });
 
+  test("namespace", async () => {
+    const before = await inspect(sql);
+
+    await sql`create schema if not exists "test_schema"`;
+
+    const after = await inspect(sql);
+
+    expect(await diff(sql, { left: before, right: after })).toEqual([
+      {
+        kind: "+",
+        type: "pg_namespace",
+        name: "test_schema",
+        namespace: "",
+        extras: { "+": { acl: null, owner: "postgres" }, delta: null },
+      },
+    ]);
+  });
+
   test("template", async () => {
     const before = await inspect(sql);
 

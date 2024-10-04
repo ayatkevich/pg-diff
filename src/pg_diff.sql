@@ -359,6 +359,17 @@ create or replace view "pg_diff_inspect" as (
         'acl', datAcl
       ) as "extras"
     from pg_database
+  union
+  select
+      null as "kind",
+      'pg_namespace' as "type",
+      nspName as "name",
+      '' as "namespace",
+      jsonb_build_object(
+        'owner', nspOwner::regRole,
+        'acl', nspAcl
+      ) as "extras"
+    from pg_namespace
 );
 
 create or replace function "jsonb_delta_fn" ("~state" jsonb, "~value" jsonb)
