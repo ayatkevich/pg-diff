@@ -1046,6 +1046,36 @@ describe("pg-diff", () => {
     ]);
   });
 
+  test("collation", async () => {
+    const before = await inspect(sql);
+
+    await sql`create collation "test_collation" from "C"`;
+
+    const after = await inspect(sql);
+
+    expect(await diff(sql, { left: before, right: after })).toEqual([
+      {
+        kind: "+",
+        type: "pg_collation",
+        name: "test_collation",
+        namespace: "public",
+        extras: {
+          "+": {
+            type: "C",
+            owner: "postgres",
+            rules: null,
+            locale: null,
+            collate: "C",
+            encoding: "",
+            provider: "c",
+            deterministic: true,
+          },
+          delta: null,
+        },
+      },
+    ]);
+  });
+
   test("template", async () => {
     const before = await inspect(sql);
 

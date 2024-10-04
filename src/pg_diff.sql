@@ -384,6 +384,23 @@ create or replace view "pg_diff_inspect" as (
         'tags', evtTags
       ) as "extras"
     from pg_event_trigger
+  union
+  select
+      null as "kind",
+      'pg_collation' as "type",
+      collName as "name",
+      collNamespace::regNamespace::text as "namespace",
+      jsonb_build_object(
+        'owner', collOwner::regRole,
+        'provider', collProvider,
+        'encoding', pg_encoding_to_char(collEncoding),
+        'collate', collCollate,
+        'type', collCType,
+        'locale', collICULocale,
+        'rules', collICURules,
+        'deterministic', collIsDeterministic
+      ) as "extras"
+    from pg_collation
 );
 
 create or replace function "jsonb_delta_fn" ("~state" jsonb, "~value" jsonb)
