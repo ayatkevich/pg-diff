@@ -304,11 +304,6 @@ Sure! Here's the list of missing PostgreSQL objects formatted as a Markdown TODO
   - **System Catalog**: `pg_tablespace`
   - **Description**: Define locations on the file system where data files reside; important for storage management.
 
-- [ ] **Publication Subscriptions**
-
-  - **System Catalog**: `pg_subscription`
-  - **Description**: Used in logical replication to subscribe to publications from other databases.
-
 - [ ] **Extended Statistics**
 
   - **System Catalog**: `pg_statistic_ext`

@@ -401,6 +401,29 @@ create or replace view "pg_diff_inspect" as (
         'deterministic', collIsDeterministic
       ) as "extras"
     from pg_collation
+  union
+  -- TODO test
+  select
+      null as "kind",
+      'pg_subscription' as "type",
+      subName as "name",
+      '' as "namespace",
+      jsonb_build_object(
+        'owner', subOwner::regRole,
+        'enabled', subEnabled,
+        'binary', subBinary,
+        'stream', subStream,
+        'twoPhaseState', subTwoPhaseState,
+        'disableOnError', subDisableOnErr,
+        'passwordRequired', subPasswordRequired,
+        'runAsOwner', subRunAsOwner,
+        'connectionInfo', subConnInfo,
+        'slotName', subSlotName,
+        'syncCommit', subSyncCommit,
+        'publications', subPublications,
+        'origin', subOrigin
+      ) as "extras"
+    from pg_subscription
 );
 
 create or replace function "jsonb_delta_fn" ("~state" jsonb, "~value" jsonb)
