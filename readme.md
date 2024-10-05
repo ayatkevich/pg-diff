@@ -251,6 +251,8 @@ Each difference object contains the following properties:
 - **Databases** (`pg_database`)
 - **Schemas** (`pg_namespace`)
 - **Event Triggers** (`pg_event_trigger`)
+- **Collation** (`pg_collation`)
+- **Subscription** (`pg_subscription`)
 
 ## Testing
 
