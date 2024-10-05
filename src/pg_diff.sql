@@ -424,6 +424,30 @@ create or replace view "pg_diff_inspect" as (
         'origin', subOrigin
       ) as "extras"
     from pg_subscription
+  union
+  select
+      null as "kind",
+      'pg_index' as "type",
+      indexRelId::regClass::text as "name",
+      relNamespace::regNamespace::text as "namespace",
+      jsonb_build_object(
+        'index', indexRelId::regClass,
+        'isUnique', indIsUnique,
+        'isPrimary', indIsPrimary,
+        'columns', indNAtts,
+        'isNullsNotDistinct', indNullsNotDistinct,
+        'isExclusion', indIsExclusion,
+        'isImmediate', indImmediate,
+        'isClustered', indIsClustered,
+        'isReady', indIsReady,
+        'isLive', indIsLive,
+        'isReplIdent', indIsReplIdent,
+        'option', indOption,
+        'expression', pg_get_expr(indExprs, indRelId, true),
+        'predicate', pg_get_expr(indPred, indRelId, true)
+      ) as "extras"
+    from pg_index
+      inner join pg_class on indexRelId = pg_class.oid
 );
 
 create or replace function "jsonb_delta_fn" ("~state" jsonb, "~value" jsonb)

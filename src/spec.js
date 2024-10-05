@@ -4,7 +4,7 @@ import { citext } from "@electric-sql/pglite/contrib/citext";
 import { afterAll, beforeAll, describe, expect, test } from "@jest/globals";
 import { definition as slon } from "pg-slon";
 import postgres from "postgres";
-import { definition, diff, inspect } from "./index.js";
+import { definition, definitionPath, diff, inspect } from "./index.js";
 
 describe("pg-diff", () => {
   // @ts-ignore
@@ -336,6 +336,31 @@ describe("pg-diff", () => {
           "+": expect.objectContaining({}),
           "-": expect.objectContaining({}),
           delta: { notNull: [true, false] },
+        },
+      },
+      {
+        kind: "+",
+        type: "pg_index",
+        name: "test_pkey",
+        namespace: "public",
+        extras: {
+          "+": {
+            index: "test_pkey",
+            isLive: true,
+            option: [0],
+            columns: 1,
+            isReady: true,
+            isUnique: true,
+            isPrimary: true,
+            predicate: null,
+            expression: null,
+            isClustered: false,
+            isExclusion: false,
+            isImmediate: true,
+            isReplIdent: false,
+            isNullsNotDistinct: false,
+          },
+          delta: null,
         },
       },
     ]);
@@ -830,6 +855,10 @@ describe("pg-diff", () => {
         name: "slon_node",
       }),
       expect.objectContaining({
+        type: "pg_index",
+        name: "slon_pkey",
+      }),
+      expect.objectContaining({
         type: "pg_proc",
         name: "slon_delete(slon): slon",
       }),
@@ -1076,6 +1105,42 @@ describe("pg-diff", () => {
     ]);
   });
 
+  test("index", async () => {
+    const before = await inspect(sql);
+
+    await sql`create index "test_index" on "test" ("column")`;
+
+    const after = await inspect(sql);
+
+    expect(await diff(sql, { left: before, right: after })).toEqual([
+      {
+        kind: "+",
+        type: "pg_index",
+        name: "test_index",
+        namespace: "public",
+        extras: {
+          "+": {
+            index: "test_index",
+            isLive: true,
+            option: [0],
+            columns: 1,
+            isReady: true,
+            isUnique: false,
+            isPrimary: false,
+            predicate: null,
+            expression: null,
+            isClustered: false,
+            isExclusion: false,
+            isImmediate: true,
+            isReplIdent: false,
+            isNullsNotDistinct: false,
+          },
+          delta: null,
+        },
+      },
+    ]);
+  });
+
   test("template", async () => {
     const before = await inspect(sql);
 
@@ -1087,7 +1152,7 @@ describe("pg-diff", () => {
 
 describe("using postgres.js", () => {
   const sql = postgres({ user: "postgres" });
-  beforeAll(async () => sql.file("./src/pg_diff.sql").simple());
+  beforeAll(async () => sql.file(definitionPath).simple());
   afterAll(async () => sql.end());
 
   test("view", async () => {
