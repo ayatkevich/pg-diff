@@ -22,15 +22,23 @@ npm install @ayatkevich/pg-diff
 Before using `pg-diff`, you need to execute the SQL definitions that create the necessary functions and views in your PostgreSQL database. The SQL code is provided in the `definition` export.
 
 ```javascript
-import { definition } from "@ayatkevich/pg-diff";
+import { definitionPath } from "@ayatkevich/pg-diff";
 import postgres from "postgres";
 
-const sql = postgres({
-  /* your connection config */
-});
+const sql = postgres();
 
 // Execute the SQL definitions
-await sql([definition]);
+await sql.file(definitionPath);
+```
+
+```javascript
+import { definition } from "@ayatkevich/pg-diff";
+import { PGlite } from "@electric-sql/pglite";
+
+const pg = new PGlite();
+
+// Execute the SQL definitions
+await pg.exec(definition);
 ```
 
 ## Usage

@@ -5,7 +5,9 @@ import { fileURLToPath } from "url";
 
 const dirname = fileURLToPath(new URL(".", import.meta.url));
 
-export const definition = await readFile(path.join(dirname, "pg_diff.sql"), "utf8");
+export const definitionPath = path.join(dirname, "pg_diff.sql");
+
+export const definition = await readFile(definitionPath, "utf8");
 
 export async function inspect(sql) {
   return await sql`
