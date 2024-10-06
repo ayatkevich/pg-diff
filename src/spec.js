@@ -257,7 +257,6 @@ describe("pg-diff", () => {
           "+": {
             canLogin: false,
             inherits: true,
-            password: null,
             bypassRLS: false,
             validUntil: null,
             isSuperuser: false,

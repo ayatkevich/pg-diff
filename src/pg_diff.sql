@@ -106,8 +106,7 @@ create or replace view "pg_diff_inspect" as (
         'replication', rolReplication,
         'bypassRLS', rolBypassRLS,
         'connectionLimit', rolConnLimit,
-        'validUntil', rolValidUntil,
-        'password', rolPassword
+        'validUntil', rolValidUntil
       ) as "extras"
     from pg_authid
   union
