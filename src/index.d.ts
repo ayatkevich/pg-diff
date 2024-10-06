@@ -6,15 +6,19 @@ type SqlFunction = (
   ...substitutions: any[]
 ) => Promise<Record<string, any>[]>;
 
-interface InspectionRecord {
-  kind: null;
+interface _Record {
+  kind: "+" | "-" | "+-" | null;
   type: string;
   name: string;
   namespace: string;
   extras: Record<string, any>;
 }
 
-interface DiffRecord extends InspectionRecord {
+interface InspectionRecord extends _Record {
+  kind: null;
+}
+
+interface DiffRecord extends _Record {
   kind: "+" | "-" | "+-";
 }
 
